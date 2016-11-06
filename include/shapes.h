@@ -7,6 +7,12 @@ struct vec3 {
 	double z;
 };
 
+struct vec3int {
+	int x;
+	int y;
+	int z;
+};
+
 struct triangle {
 	struct vec3 points[3];
 };
