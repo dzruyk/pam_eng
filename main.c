@@ -4,9 +4,10 @@
 #include "obj_loader.h"
 #include "macros.h"
 #include "shapes.h"
+#include "matrix.h"
 
-#define SURWIDTH 1024
-#define SURHEIGHT 1024
+#define SURWIDTH  5000
+#define SURHEIGHT 5000
 
 struct rgba {
 	unsigned char b;
@@ -70,7 +71,7 @@ draw_cube(cairo_t *cr)
 }
 
 void
-draw_model(cairo_t *cr)
+draw_model(cairo_t *cr, struct mat3 *h)
 {
 	obj_loader obj;
 	int i, j;
@@ -79,7 +80,6 @@ draw_model(cairo_t *cr)
 
 	load_obj(&obj, "african_head.obj");
 	cairo_set_source_rgb(cr, 0, 0, 0);
-
 	// Flip y coordinate for upside-down source image
 	for (i = 0; i < obj.nfaces; i++) {
 		struct vec3int *f;
@@ -89,6 +89,7 @@ draw_model(cairo_t *cr)
 
 		f = vector_get(&obj.faces, i);
 		a = vector_get(&obj.vertexes, f->x - 1);
+		a = mat3vec(h, a);
 		arr = &f->x;
 
 		x = ((a->x + 1.) * SURWIDTH) / 2;
@@ -99,7 +100,7 @@ draw_model(cairo_t *cr)
 
 			idx = arr[(j + 1) % 3];
 			a = vector_get(&obj.vertexes, idx - 1);
-
+			a = mat3vec(h, a);
 			x = ((a->x + 1.) * SURWIDTH) / 2;
 			y = ((-a->y + 1.) * SURWIDTH) / 2;
 			cairo_line_to(cr, x, y);
@@ -129,7 +130,7 @@ main(int argc, const char *argv[])
 
 	//draw_cube(cr);
 
-	draw_model(cr);
+	draw_model(cr, mat3rotate(0.53, 1)); // give matrix that multiplies model
 
 	cairo_surface_write_to_png(sur, "img.png");
 
