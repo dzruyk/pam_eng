@@ -6,8 +6,8 @@
 #include "shapes.h"
 #include "matrix.h"
 
-#define SURWIDTH  5000
-#define SURHEIGHT 5000
+#define SURWIDTH  4096
+#define SURHEIGHT 4096
 
 struct rgba {
 	unsigned char b;
@@ -71,7 +71,7 @@ draw_cube(cairo_t *cr)
 }
 
 void
-draw_model(cairo_t *cr, struct mat3 *h)
+draw_model(cairo_t *cr, struct mat3 h)
 {
 	obj_loader obj;
 	int i, j;
@@ -83,26 +83,26 @@ draw_model(cairo_t *cr, struct mat3 *h)
 	// Flip y coordinate for upside-down source image
 	for (i = 0; i < obj.nfaces; i++) {
 		struct vec3int *f;
-		struct vec3 *a;
+		struct vec3 a;
 		int x, y;
 		int *arr;
 
-		f = vector_get(&obj.faces, i);
-		a = vector_get(&obj.vertexes, f->x - 1);
+		f = stack_get(&obj.faces, i);
+		a = *(struct vec3 *)stack_get(&obj.vertexes, f->x - 1);
 		a = mat3vec(h, a);
 		arr = &f->x;
 
-		x = ((a->x + 1.) * SURWIDTH) / 2;
-		y = ((-a->y + 1.) * SURWIDTH) / 2;
+		x = ((a.x + 1.) * SURWIDTH) / 2;
+		y = ((-a.y + 1.) * SURWIDTH) / 2;
 		cairo_move_to(cr, x, y);
 		for (j = 0; j < 3; j++) {
 			int idx;
 
 			idx = arr[(j + 1) % 3];
-			a = vector_get(&obj.vertexes, idx - 1);
+			a = *(struct vec3 *)stack_get(&obj.vertexes, idx - 1);
 			a = mat3vec(h, a);
-			x = ((a->x + 1.) * SURWIDTH) / 2;
-			y = ((-a->y + 1.) * SURWIDTH) / 2;
+			x = ((a.x + 1.) * SURWIDTH) / 2;
+			y = ((-a.y + 1.) * SURWIDTH) / 2;
 			cairo_line_to(cr, x, y);
 		}
 		cairo_stroke(cr);
@@ -130,7 +130,7 @@ main(int argc, const char *argv[])
 
 	//draw_cube(cr);
 
-	draw_model(cr, mat3rotate(0.53, 1)); // give matrix that multiplies model
+	draw_model(cr, mat3mult(mat3scale(1.2, 1.2), mat3rotate(-0.53, 1))); // give matrix that multiplies model
 
 	cairo_surface_write_to_png(sur, "img.png");
 

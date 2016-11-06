@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "vector.h"
+#include "stack.h"
 #include "macros.h"
 #include "shapes.h"
 #include "obj_loader.h"
@@ -18,15 +18,15 @@ obj_loader_init(obj_loader *obj)
 {
 	obj->nverts = obj->nfaces = 0;
 
-	vector_init(&obj->vertexes, sizeof(struct vec3));
-	vector_init(&obj->faces, sizeof(struct vec3int));
+	stack_init(&obj->vertexes, sizeof(struct vec3));
+	stack_init(&obj->faces, sizeof(struct vec3int));
 }
 
 void
 obj_loader_finalize(obj_loader *obj)
 {
-	vector_free(&obj->vertexes);
-	vector_free(&obj->faces);
+	stack_free(&obj->vertexes);
+	stack_free(&obj->faces);
 }
 
 void
@@ -47,13 +47,13 @@ load_obj(obj_loader *obj, char *fname)
 			struct vec3 v;
 
 			parse_vertex(buf + 2, &v);
-			vector_push(&obj->vertexes, &v);
+			stack_push(&obj->vertexes, &v);
 		} else if (buf[0] == 'f') {
 			struct vec3int f = {0};
 
 			parse_face(buf + 2, &f);
 			//printf("buf = %s face %d %d %d\n", buf, f.x, f.y, f.z);
-			vector_push(&obj->faces, &f);
+			stack_push(&obj->faces, &f);
 		}
 
 	}

@@ -1,13 +1,13 @@
 #ifndef __OBJ_LOADER_H__
 #define __OBJ_LOADER_H__
 
-#include "vector.h"
+#include "stack.h"
 
 typedef struct {
 	int nverts;
 	int nfaces;
-	vector vertexes;
-	vector faces;
+	stack vertexes;
+	stack faces;
 } obj_loader;
 
 void obj_loader_init(obj_loader *obj);
