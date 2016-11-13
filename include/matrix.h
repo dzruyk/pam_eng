@@ -1,7 +1,83 @@
 #ifndef _MATRIX_H_
 #define _MATRIX_H_
 
-#include "shapes.h"
+
+struct vec2 {
+	union {
+		struct {
+			double x;
+			double y;
+		};
+		double arr[2];
+	};
+};
+
+struct vec3 {
+	union {
+		struct {
+			double x;
+			double y;
+			double z;
+		};
+		double arr[3];
+	};
+};
+
+struct vec4 {
+	union {
+		struct {
+			double x;
+			double y;
+			double z;
+			double w;
+		};
+		double arr[4];
+	};
+};
+
+struct mat2 {
+	union {
+		struct {
+			double _11,_12,
+		  	       _21,_22;
+		};
+		double arr[2][2];
+	};
+};
+
+struct mat3 {
+	union {
+		struct {
+			double _11,_12,_13,
+			       _21,_22,_23,
+			       _31,_32,_33;
+		};
+		double arr[3][3];
+	};
+};
+
+struct mat4 {
+	union {
+		struct {
+			double _11,_12,_13,_14,
+			       _21,_22,_23,_24,
+			       _31,_32,_33,_34,
+			       _41,_42,_43,_44;
+		};
+		double arr[4][4];
+	};
+};
+
+struct vec3int {
+	union {
+		struct {
+			int x;
+			int y;
+			int z;
+		};
+		int arr[3];
+	}
+};
 
 
 struct mat2

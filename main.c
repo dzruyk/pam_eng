@@ -87,8 +87,8 @@ draw_model(cairo_t *cr, struct mat3 h)
 		int x, y;
 		int *arr;
 
-		f = stack_get(&obj.faces, i);
-		a = *(struct vec3 *)stack_get(&obj.vertexes, f->x - 1);
+		f = dbuf_get(&obj.faces, i);
+		a = *(struct vec3 *)dbuf_get(&obj.vertexes, f->x - 1);
 		a = mat3vec(h, a);
 		arr = &f->x;
 
@@ -99,7 +99,7 @@ draw_model(cairo_t *cr, struct mat3 h)
 			int idx;
 
 			idx = arr[(j + 1) % 3];
-			a = *(struct vec3 *)stack_get(&obj.vertexes, idx - 1);
+			a = *(struct vec3 *)dbuf_get(&obj.vertexes, idx - 1);
 			a = mat3vec(h, a);
 			x = ((a.x + 1.) * SURWIDTH) / 2;
 			y = ((-a.y + 1.) * SURWIDTH) / 2;
