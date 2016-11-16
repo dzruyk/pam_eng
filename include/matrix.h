@@ -76,7 +76,7 @@ struct vec3int {
 			int z;
 		};
 		int arr[3];
-	}
+	};
 };
 
 

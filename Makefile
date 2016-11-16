@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Wall -I./include
 BIN=runit
 LDFLAGS=-lcairo -lm
-OBJS=main.o obj_loader.o dbuf.o matrix.o
+OBJS=main.o utils/obj_loader.o core/dbuf.o math/matrix.o
 
 all: $(BIN)
 
