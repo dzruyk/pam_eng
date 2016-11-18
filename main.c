@@ -1,6 +1,7 @@
 #include <stdio.h>
+#include <string.h>
 
-#include <cairo/cairo.h> 
+#include <libgen.h>
 
 #include "obj_loader.h"
 #include "macros.h"
@@ -8,58 +9,23 @@
 #include "matrix.h"
 #include "render.h"
 
-#define SURWIDTH  4096
-#define SURHEIGHT 4096
-
-struct rgba {
-	unsigned char b;
-	unsigned char g;
-	unsigned char r;
-	unsigned char a;
-};
+char *usg = "usage: %s [OPTS] input.obj output.png\n";
 
 void
-fill_surf(struct rgba *surdata)
+usage(const char *progpath)
 {
-	int x, y;
+	char *p, *pname;
 
-	for (y = 0; y < SURHEIGHT; ++y) {
-		for (x = 0; x < SURWIDTH; ++x) {
-			surdata[y * SURWIDTH + x].r = 255;
-			surdata[y * SURWIDTH + x].g = 255;
-			surdata[y * SURWIDTH + x].b = 255;
-			surdata[y * SURWIDTH + x].a = 0;
-		}
-	}
-}
+	p = strdup(progpath);
 
-int
-draw_model(const char *path)
-{
-	struct pe_context context;
-	struct pe_surface sur;
-	obj_loader obj;
-	
-	obj_loader_init(&obj);
+	if (p == NULL)
+		pname = (char *) progpath;
+	else
+		pname = basename(p);
 
-	load_obj(&obj, path);
+	printf(usg, pname);
 
-	if (pe_createsur(&sur, 720, 480, SF_RGB24) < 0) {
-		return (-1);
-	}
-
-	pe_initcontext(&context);
-	pe_settarget(&context, &sur);
-	pe_setvertex(&context, (const dbuf *) &(obj.vertexes));
-	pe_setindex(&context, (const dbuf *) &(obj.faces));	
-
-	pe_render(&context);
-
-	obj_loader_finalize(&obj);
-
-	pe_writesur(&sur, "1.png");
-
-	return 0;
+	exit(1);
 }
 
 int
@@ -70,8 +36,8 @@ main(int argc, const char *argv[])
 	obj_loader obj;
 
 	if (argc < 3)
-		printf("usage: runit [input .obj] [output .png]\n");
-	
+		usage(argv[0]);
+
 	obj_loader_init(&obj);
 
 	load_obj(&obj, argv[1]);
@@ -83,7 +49,7 @@ main(int argc, const char *argv[])
 	pe_initcontext(&context);
 	pe_settarget(&context, &sur);
 	pe_setvertex(&context, (const dbuf *) &(obj.vertexes));
-	pe_setindex(&context, (const dbuf *) &(obj.faces));	
+	pe_setindex(&context, (const dbuf *) &(obj.faces));
 
 	pe_render(&context);
 

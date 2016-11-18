@@ -1,6 +1,7 @@
 #include "render.h"
 
-void pe_safefree(void **p)
+void
+pe_safefree(void **p)
 {
 	if (*p != NULL) {
 		free(*p);
@@ -31,7 +32,7 @@ pe_settarget(struct pe_context *c, struct pe_surface *sur)
 {
 	if (c == NULL || sur == NULL)
 		return (-1);
-	
+
 	c->target = sur;
 
 	return 0;
@@ -130,13 +131,13 @@ wiredrender(const struct pe_context *c)
 		struct vec4 a;
 		int x, y;
 		int *arr;
-		
+
 		f = dbuf_get(c->index, i);
 		a = *(struct vec4 *)dbuf_get(c->vertex, f->x - 1);
 		a.w = 1.0;
 		a = mat4vec(c->worldmat, a);
 		arr = &f->x;
-		
+
 		x = ((a.x + 1.) * c->target->h) / 2;
 		y = ((a.y + 1.) * c->target->w) / 2;
 
@@ -152,7 +153,7 @@ wiredrender(const struct pe_context *c)
 			a = mat4vec(c->worldmat, a);
 			x = ((a.x + 1.) * c->target->h) / 2;
 			y = ((a.y + 1.) * c->target->w) / 2;
-			
+
 			pe_lineto(c->target, x, y);
 		}
 
@@ -168,3 +169,4 @@ pe_render(struct pe_context *c)
 
 	return 0;
 }
+

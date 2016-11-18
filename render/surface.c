@@ -53,11 +53,11 @@ int pe_destroysur(struct pe_surface *sur)
 	if (pe_surisvalid(sur)) {
 		return (-1);
 	}
-	
+
 	sur->w = 0;
 	sur->h = 0;
 	sur->fmt = -1;
-	
+
 	if (sur->data == NULL)
 		free(sur->data);
 
@@ -88,7 +88,7 @@ int pe_setpos(int x, int y)
 
 	linex0 = x;
 	liney0 = y;
-	
+
 	return 0;
 }
 
@@ -97,16 +97,16 @@ int pe_lineto(struct pe_surface *sur, int x1, int y1)
 	int deltax, deltay;
 	int signx, signy;
 	int error;
-	
+
 	if (sur->fmt != SF_RGB24)
 		return (-1);
-	 
+
 	deltax = abs(x1 - linex0);
 	deltay = abs(y1 - liney0);
 	signx = linex0 < x1 ? 1 : -1;
 	signy = liney0 < y1 ? 1 : -1;
 	error = deltax - deltay;
-    
+
 //	printf("%d %d %d %d\n", linex0, liney0, x1, y1);
 
 	while (linex0 != x1 || liney0 != y1) {
@@ -114,14 +114,14 @@ int pe_lineto(struct pe_surface *sur, int x1, int y1)
 
 
 //		printf("%d %d %d %d\n", linex0, liney0, x1, y1);
-    		
+
 		if (linex0 >= 0 && linex0 < sur->w
 			&& liney0 >= 0 && liney0 < sur->h) {
 			sur->data[(liney0 * sur->w + linex0) * 3 + 0] = 255;
 			sur->data[(liney0 * sur->w + linex0) * 3 + 1] = 255;
 			sur->data[(liney0 * sur->w + linex0) * 3 + 2] = 255;
 		}
-	
+
 		error2 = error * 2;
 
 		if (error2 > -deltay) {
@@ -148,7 +148,7 @@ int pe_writesur(const struct pe_surface *sur, const char *path)
 	if (!pe_surisvalid(sur) || sur->fmt != SF_RGB24) {
 		return (-1);
 	}
-	
+
 	csur = cairo_image_surface_create(CAIRO_FORMAT_RGB24, sur->w, sur->h);
 
 	surdata = cairo_image_surface_get_data(csur);

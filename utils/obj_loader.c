@@ -10,8 +10,8 @@
 
 #define BUFSZ 1024
 
-static void parse_vertex(char *line, struct vec4 *v);
-static void parse_face(char *line, struct vec3int *v);
+static void parse_vertex(const char *line, struct vec4 *v);
+static void parse_face(const char *line, struct vec3int *v);
 
 void
 obj_loader_init(obj_loader *obj)
@@ -44,7 +44,7 @@ load_obj(obj_loader *obj, const char *fname)
 			continue;
 
 		if (buf[0] == 'v') {
-			struct vec4 v;
+			struct vec4 v = {0};
 
 			parse_vertex(buf + 2, &v);
 			dbuf_push(&obj->vertexes, &v);
@@ -63,19 +63,19 @@ load_obj(obj_loader *obj, const char *fname)
 }
 
 static void
-parse_vertex(char *line, struct vec4 *v)
+parse_vertex(const char *line, struct vec4 *v)
 {
 	sscanf(line, "%lf %lf %lf", &v->x, &v->y, &v->z);
 }
 
 static void
-parse_face_row(char *line, int *p)
+parse_face_row(const char *line, int *p)
 {
 	sscanf(line, "%d", p);
 }
 
 static void
-parse_face(char *line, struct vec3int *v)
+parse_face(const char *line, struct vec3int *v)
 {
 	char *p;
 

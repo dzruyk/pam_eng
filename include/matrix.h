@@ -107,16 +107,16 @@ mat3identity();
 struct mat3
 mat3rotate(double angle, unsigned char dimension);
 
-struct mat3 
+struct mat3
 mat3scale(double a, double b);
 
-struct mat3 
+struct mat3
 mat3move(double a, double b);
 
-struct mat4 
+struct mat4
 mat4init(double *arr);
 
-struct mat4 
+struct mat4
 mat4mult(struct mat4 a, struct mat4 b);
 
 struct vec4
@@ -125,13 +125,13 @@ mat4vec(struct mat4 a, struct vec4 b);
 struct mat4
 mat4identity();
 
-struct mat4 
+struct mat4
 mat4rotate(double angle, unsigned char dimension);
 
-struct mat4 
+struct mat4
 mat4scale(double a, double b, double c);
 
-struct mat4 
+struct mat4
 mat4move(double a, double b, double c);
 
 
