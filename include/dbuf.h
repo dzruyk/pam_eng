@@ -32,7 +32,7 @@ void*
 dbuf_getarr(dbuf *Dbuf);
 
 void*
-dbuf_get(dbuf *Dbuf, int index);
+dbuf_get(const dbuf *Dbuf, int index);
 
 void
 dbuf_set(dbuf *Dbuf, int index, void *value);

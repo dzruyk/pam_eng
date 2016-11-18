@@ -40,6 +40,17 @@ mat2vec(struct mat2 a, struct vec2 b)
 	return c;
 }
 
+struct mat2
+mat2identity()
+{
+	struct mat2 m;
+
+	m._11 = 1.0; m._12 = 0.0;
+	m._21 = 0.0; m._22 = 1.0;
+
+	return m;
+}
+
 struct mat3
 mat3init(double *arr)
 {
@@ -80,6 +91,18 @@ mat3vec(struct mat3 a, struct vec3 b)
 	c.z = a._31 * b.x + a._32 * b.y + a._33 * b.z;
 
 	return c;
+}
+
+struct mat3
+mat3identity()
+{
+	struct mat3 m;
+
+	m._11 = 1.0; m._12 = 0.0; m._13 = 0.0;
+	m._21 = 0.0; m._22 = 1.0; m._23 = 0.0;
+	m._31 = 0.0; m._32 = 0.0; m._33 = 1.0;
+	
+	return m;
 }
 
 struct mat3
@@ -184,6 +207,19 @@ mat4vec(struct mat4 a, struct vec4 b)
 }
 
 struct mat4
+mat4identity()
+{
+	struct mat4 m;
+
+	m._11 = 1.0; m._12 = 0.0; m._13 = 0.0; m._14 = 0.0;
+	m._21 = 0.0; m._22 = 1.0; m._23 = 0.0; m._24 = 0.0;
+	m._31 = 0.0; m._32 = 0.0; m._33 = 1.0; m._34 = 0.0;
+	m._41 = 0.0; m._42 = 0.0; m._43 = 0.0; m._44 = 1.0;
+	
+	return m;
+}
+
+struct mat4
 mat4rotate(double angle, unsigned char dimension)
 {
 	struct mat4 m;
@@ -210,7 +246,6 @@ mat4rotate(double angle, unsigned char dimension)
 	}
 	return m;
 }
-
 
 struct mat4
 mat4move(double a, double b, double c)

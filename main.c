@@ -1,10 +1,12 @@
 #include <stdio.h>
 
 #include <cairo/cairo.h> 
+
 #include "obj_loader.h"
 #include "macros.h"
 #include "shapes.h"
 #include "matrix.h"
+#include "render.h"
 
 #define SURWIDTH  4096
 #define SURHEIGHT 4096
@@ -31,110 +33,64 @@ fill_surf(struct rgba *surdata)
 	}
 }
 
-void
-draw_cube(cairo_t *cr)
+int
+draw_model(const char *path)
 {
-	struct triangle tl[] = {
-		{
-			{
-				{1, 1, 1},
-				{100, 1, 1},
-				{1, 100, 1}
-			}
-		},
-		{
-			{
-				{100, 1, 1},
-				{100, 100, 1},
-				{1, 100, 1}
-			}
-		}
-	};
-
-	int i, j;
-
-	//WRITEME!
-	cairo_set_source_rgb(cr, 1, 0, 0);
-
-	for (i = 0; i < ARRSZ(tl); i++) {
-		struct vec3 *p = tl[i].points;
-		printf("vec3\n");
-
-		cairo_move_to(cr, p[0].x, p[0].y);
-		for (j = 1; j <= 3; j++) {
-			int tmp = j % 3;
-			cairo_line_to(cr, p[tmp].x, p[tmp].y);
-		}
-		cairo_stroke(cr);
-	}
-	cairo_stroke(cr);
-}
-
-void
-draw_model(cairo_t *cr, struct mat3 h)
-{
+	struct pe_context context;
+	struct pe_surface sur;
 	obj_loader obj;
-	int i, j;
-
+	
 	obj_loader_init(&obj);
 
-	load_obj(&obj, "african_head.obj");
-	cairo_set_source_rgb(cr, 0, 0, 0);
-	// Flip y coordinate for upside-down source image
-	for (i = 0; i < obj.nfaces; i++) {
-		struct vec3int *f;
-		struct vec3 a;
-		int x, y;
-		int *arr;
+	load_obj(&obj, path);
 
-		f = dbuf_get(&obj.faces, i);
-		a = *(struct vec3 *)dbuf_get(&obj.vertexes, f->x - 1);
-		a = mat3vec(h, a);
-		arr = &f->x;
-
-		x = ((a.x + 1.) * SURWIDTH) / 2;
-		y = ((-a.y + 1.) * SURWIDTH) / 2;
-		cairo_move_to(cr, x, y);
-		for (j = 0; j < 3; j++) {
-			int idx;
-
-			idx = arr[(j + 1) % 3];
-			a = *(struct vec3 *)dbuf_get(&obj.vertexes, idx - 1);
-			a = mat3vec(h, a);
-			x = ((a.x + 1.) * SURWIDTH) / 2;
-			y = ((-a.y + 1.) * SURWIDTH) / 2;
-			cairo_line_to(cr, x, y);
-		}
-		cairo_stroke(cr);
-
+	if (pe_createsur(&sur, 720, 480, SF_RGB24) < 0) {
+		return (-1);
 	}
-	cairo_stroke(cr);
+
+	pe_initcontext(&context);
+	pe_settarget(&context, &sur);
+	pe_setvertex(&context, (const dbuf *) &(obj.vertexes));
+	pe_setindex(&context, (const dbuf *) &(obj.faces));	
+
+	pe_render(&context);
 
 	obj_loader_finalize(&obj);
+
+	pe_writesur(&sur, "1.png");
+
+	return 0;
 }
 
 int
 main(int argc, const char *argv[])
 {
-	cairo_t *cr;
-	cairo_surface_t *sur;
-	struct rgba *surdata;
+	struct pe_context context;
+	struct pe_surface sur;
+	obj_loader obj;
 
-	sur = cairo_image_surface_create(CAIRO_FORMAT_RGB24, SURWIDTH, SURHEIGHT);
+	if (argc < 3)
+		printf("usage: runit [input .obj] [output .png]\n");
+	
+	obj_loader_init(&obj);
 
-	surdata = (struct rgba *)cairo_image_surface_get_data(sur);
+	load_obj(&obj, argv[1]);
 
-	fill_surf(surdata);
+	if (pe_createsur(&sur, 720, 480, SF_RGB24) < 0) {
+		return (-1);
+	}
 
-	cr = cairo_create(sur);
+	pe_initcontext(&context);
+	pe_settarget(&context, &sur);
+	pe_setvertex(&context, (const dbuf *) &(obj.vertexes));
+	pe_setindex(&context, (const dbuf *) &(obj.faces));	
 
-	//draw_cube(cr);
+	pe_render(&context);
 
-	draw_model(cr, mat3mult(mat3scale(1.2, 1.2), mat3rotate(-0.53, 1))); // give matrix that multiplies model
+	obj_loader_finalize(&obj);
 
-	cairo_surface_write_to_png(sur, "img.png");
+	pe_writesur(&sur, argv[2]);
 
-	printf("xx\n");
 	return 0;
 }
 

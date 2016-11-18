@@ -10,7 +10,7 @@
 
 #define BUFSZ 1024
 
-static void parse_vertex(char *line, struct vec3 *v);
+static void parse_vertex(char *line, struct vec4 *v);
 static void parse_face(char *line, struct vec3int *v);
 
 void
@@ -18,7 +18,7 @@ obj_loader_init(obj_loader *obj)
 {
 	obj->nverts = obj->nfaces = 0;
 
-	dbuf_init(&obj->vertexes, sizeof(struct vec3));
+	dbuf_init(&obj->vertexes, sizeof(struct vec4));
 	dbuf_init(&obj->faces, sizeof(struct vec3int));
 }
 
@@ -30,7 +30,7 @@ obj_loader_finalize(obj_loader *obj)
 }
 
 void
-load_obj(obj_loader *obj, char *fname)
+load_obj(obj_loader *obj, const char *fname)
 {
 	FILE *fp;
 	char buf[BUFSZ];
@@ -44,7 +44,7 @@ load_obj(obj_loader *obj, char *fname)
 			continue;
 
 		if (buf[0] == 'v') {
-			struct vec3 v;
+			struct vec4 v;
 
 			parse_vertex(buf + 2, &v);
 			dbuf_push(&obj->vertexes, &v);
@@ -52,7 +52,6 @@ load_obj(obj_loader *obj, char *fname)
 			struct vec3int f = {0};
 
 			parse_face(buf + 2, &f);
-			//printf("buf = %s face %d %d %d\n", buf, f.x, f.y, f.z);
 			dbuf_push(&obj->faces, &f);
 		}
 
@@ -64,7 +63,7 @@ load_obj(obj_loader *obj, char *fname)
 }
 
 static void
-parse_vertex(char *line, struct vec3 *v)
+parse_vertex(char *line, struct vec4 *v)
 {
 	sscanf(line, "%lf %lf %lf", &v->x, &v->y, &v->z);
 }
