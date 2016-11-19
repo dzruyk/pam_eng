@@ -14,8 +14,8 @@ pe_initcontext(struct pe_context *c)
 {
 	c->conf.usetexture = 0;
 
-	c->worldmat = mat4identity();
-	c->perspmat = mat4identity();
+	mat4identity(&c->worldmat);
+	mat4identity(&c->perspmat);
 
 	c->mat = NULL;
 	c->texture = NULL;
@@ -127,16 +127,17 @@ wiredrender(const struct pe_context *c)
 
 	for (i = 0; i < c->index->length; i += 3) {
 		int *pidx;
-		struct vec4 a;
+		struct vec4 *pa, tmp;
 		int x, y;
 
 		pidx = dbuf_get(c->index, i);
-		a = *(struct vec4 *)dbuf_get(c->vertex, pidx[0] - 1);
-		a.w = 1.0;
-		a = mat4vec(c->worldmat, a);
+		pa = dbuf_get(c->vertex, pidx[0] - 1);
+		pa->w = 1.0;
 
-		x = ((a.x + 1.) * c->target->w) / 2;
-		y = ((a.y + 1.) * c->target->h) / 2;
+		pa = mat4vec(&tmp, &c->worldmat, pa);
+
+		x = ((pa->x + 1.) * c->target->w) / 2;
+		y = ((pa->y + 1.) * c->target->h) / 2;
 
 		pe_setpos(x, y);
 
@@ -146,11 +147,11 @@ wiredrender(const struct pe_context *c)
 			// Traverse each vertex of triangle
 			idx = pidx[(j + 1) % 3];
 
-			a = *(struct vec4 *)dbuf_get(c->vertex, idx - 1);
-			a.w = 1.0;
-			a = mat4vec(c->worldmat, a);
-			x = ((a.x + 1.) * c->target->w) / 2;
-			y = ((a.y + 1.) * c->target->h) / 2;
+			pa = dbuf_get(c->vertex, idx - 1);
+			pa->w = 1.0;
+			pa = mat4vec(&tmp, &c->worldmat, pa);
+			x = ((pa->x + 1.) * c->target->w) / 2;
+			y = ((pa->y + 1.) * c->target->h) / 2;
 
 			pe_lineto(c->target, x, y, &(c->mat->color));
 		}

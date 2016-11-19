@@ -1,6 +1,11 @@
 #ifndef _MATRIX_H_
 #define _MATRIX_H_
 
+typedef enum  {
+	DIM_X = 0,
+	DIM_Y = 1,
+	DIM_Z = 2,
+} dimension_t;
 
 struct vec2 {
 	union {
@@ -79,41 +84,40 @@ struct vec3int {
 	};
 };
 
+struct mat2 *mat2init(struct mat2 *res, const double *arr);
 
-struct mat2 mat2init(double *arr);
+struct mat2 *mat2mult(struct mat2 *res, const struct mat2 *a, const struct mat2 *b);
 
-struct mat2 mat2mult(struct mat2 a, struct mat2 b);
+struct vec2 *mat2vec(struct vec2 *res, const struct mat2 *a, const struct vec2 *b);
 
-struct vec2 mat2vec(struct mat2 a, struct vec2 b);
+struct mat2 *mat2identity(struct mat2 *res);
 
-struct mat2 mat2identity();
+struct mat3 *mat3init(struct mat3 *res, const double *arr);
 
-struct mat3 mat3init(double *arr);
+struct mat3 *mat3mult(struct mat3 *res, const struct mat3 *a, const struct mat3 *b);
 
-struct mat3 mat3mult(struct mat3 a, struct mat3 b);
+struct vec3 *mat3vec(struct vec3 *res, const struct mat3 *a, const struct vec3 *b);
 
-struct vec3 mat3vec(struct mat3 a, struct vec3 b);
+struct mat3 *mat3identity(struct mat3 *res);
 
-struct mat3 mat3identity();
+struct mat3 *mat3rotate(struct mat3 *res, double angle, dimension_t dimension);
 
-struct mat3 mat3rotate(double angle, unsigned char dimension);
+struct mat3 *mat3scale(struct mat3 *res, double a, double b);
 
-struct mat3 mat3scale(double a, double b);
+struct mat3 *mat3move(struct mat3 *res, double a, double b);
 
-struct mat3 mat3move(double a, double b);
+struct mat4 *mat4init(struct mat4 *res, const double *arr);
 
-struct mat4 mat4init(double *arr);
+struct mat4 *mat4mult(struct mat4 *res, const struct mat4 *a, const struct mat4 *b);
 
-struct mat4 mat4mult(struct mat4 a, struct mat4 b);
+struct vec4 *mat4vec(struct vec4 *res, const struct mat4 *a, const struct vec4 *b);
 
-struct vec4 mat4vec(struct mat4 a, struct vec4 b);
+struct mat4 *mat4identity(struct mat4 *res);
 
-struct mat4 mat4identity();
+struct mat4 *mat4rotate(struct mat4 *res, double angle,  dimension_t dimension);
 
-struct mat4 mat4rotate(double angle, unsigned char dimension);
+struct mat4 *mat4move(struct mat4 *res, double a, double b, double c);
 
-struct mat4 mat4scale(double a, double b, double c);
-
-struct mat4 mat4move(double a, double b, double c);
+struct mat4 *mat4scale(struct mat4 *res, double a, double b, double c);
 
 #endif
