@@ -38,7 +38,7 @@ dbuf_initarr(dbuf *Dbuf, unsigned char *arr, int length, int size) {
 }
 
 int
-dbuf_len(dbuf *Dbuf) { 
+dbuf_len(const dbuf *Dbuf) {
 
 	assert(Dbuf != NULL);
 
@@ -46,7 +46,7 @@ dbuf_len(dbuf *Dbuf) {
 }
 
 void*
-dbuf_getarr(dbuf *Dbuf) {
+dbuf_getarr(const dbuf *Dbuf) {
 
 	assert(Dbuf != NULL);
 
@@ -54,7 +54,7 @@ dbuf_getarr(dbuf *Dbuf) {
 }
 
 void*
-dbuf_get(dbuf *Dbuf, int index) {
+dbuf_get(const dbuf *Dbuf, int index) {
 
 	assert(Dbuf != NULL);
 	assert(-1 < index);

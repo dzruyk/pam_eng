@@ -26,10 +26,10 @@ void
 dbuf_initarr(dbuf *Dbuf, unsigned char *arr, int length, int size);
 
 int
-dbuf_len(dbuf *Dbuf);
+dbuf_len(const dbuf *Dbuf);
 
 void*
-dbuf_getarr(dbuf *Dbuf);
+dbuf_getarr(const dbuf *Dbuf);
 
 void*
 dbuf_get(const dbuf *Dbuf, int index);
