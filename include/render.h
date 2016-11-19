@@ -7,14 +7,13 @@
 #include "matrix.h"
 #include "surface.h"
 
-struct pe_material
-{
-
+struct pe_material {
+	struct pe_color color;
 };
 
-struct pe_contextconf
-{
-	int usematerial;
+struct pe_material pe_defmat;
+
+struct pe_contextconf {
 	int usetexture;
 };
 

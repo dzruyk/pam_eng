@@ -95,7 +95,8 @@ int pe_setpos(int x, int y)
 	return 0;
 }
 
-int pe_lineto(struct pe_surface *sur, int x1, int y1)
+int pe_lineto(struct pe_surface *sur, int x1, int y1,
+	const struct pe_color *c)
 {
 	int deltax, deltay;
 	int signx, signy;

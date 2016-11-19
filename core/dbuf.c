@@ -16,7 +16,7 @@ dbuf_init(dbuf *Dbuf, int size) {
 
 	unsigned char *tmp = malloc(Dbuf->size * Dbuf->capacity);
 
-	if (!tmp)               /* malloc returned no memory signal */
+	if (tmp == NULL)               /* malloc returned no memory signal */
 		return 1;
 
 	Dbuf->data = tmp;

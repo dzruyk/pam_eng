@@ -12,7 +12,6 @@ pe_safefree(void **p)
 int
 pe_initcontext(struct pe_context *c)
 {
-	c->conf.usematerial = 0;
 	c->conf.usetexture = 0;
 
 	c->worldmat = mat4identity();
@@ -153,7 +152,7 @@ wiredrender(const struct pe_context *c)
 			x = ((a.x + 1.) * c->target->w) / 2;
 			y = ((a.y + 1.) * c->target->h) / 2;
 
-			pe_lineto(c->target, x, y);
+			pe_lineto(c->target, x, y, &(c->mat->color));
 		}
 
 	}
