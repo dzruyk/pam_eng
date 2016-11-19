@@ -30,7 +30,7 @@ obj_loader_finalize(obj_loader *obj)
 }
 
 void
-load_obj(obj_loader *obj, const char *fname)
+obj_loader_load(obj_loader *obj, const char *fname)
 {
 	FILE *fp;
 	char buf[BUFSZ];
@@ -60,6 +60,57 @@ load_obj(obj_loader *obj, const char *fname)
 	obj->nfaces = obj->faces.length;
 
 	fclose(fp);
+}
+
+void
+obj_loader_normalize(obj_loader *obj)
+{
+	int i;
+	struct vec4 *v;
+	double lx, ly;
+	double ux, uy;
+	double cx, cy;
+	double dx, dy;
+	double dmax;
+
+	assert(obj->nverts > 0);
+
+	v = (struct vec4 *) dbuf_get(&obj->vertexes, 0);
+	lx = ux = v->x;
+	ly = uy = v->y;
+
+	for (i = 1; i < obj->nverts; i++) {
+		v = (struct vec4 *) dbuf_get(&obj->vertexes, i);
+
+		assert(v != NULL);
+
+		if (lx > v->x)
+			lx = v->x;
+		if (ly > v->y)
+			ly = v->y;
+		if (ux < v->x)
+			ux = v->x;
+		if (uy < v->y)
+			uy = v->y;
+	}
+	cx = (lx + ux) / 2;
+	cy = (ly + uy) / 2;
+
+	dx = ux - lx;
+	dy = uy - ly;
+	dmax = dx;
+
+	if (dy > dmax)
+		dmax = dy;
+	dmax /= 2;
+
+	assert(dmax != 0);
+
+	for (i = 0; i < obj->nverts; i++) {
+		v = (struct vec4 *) dbuf_get(&obj->vertexes, i);
+		v->x = (v->x - cx) / dmax;
+		v->y = (v->y - cy) / dmax;
+	}
 }
 
 static void

@@ -130,29 +130,28 @@ wiredrender(const struct pe_context *c)
 		struct vec3int *f;
 		struct vec4 a;
 		int x, y;
-		int *arr;
 
 		f = dbuf_get(c->index, i);
 		a = *(struct vec4 *)dbuf_get(c->vertex, f->x - 1);
 		a.w = 1.0;
 		a = mat4vec(c->worldmat, a);
-		arr = &f->x;
 
-		x = ((a.x + 1.) * c->target->h) / 2;
-		y = ((a.y + 1.) * c->target->w) / 2;
+		x = ((a.x + 1.) * c->target->w) / 2;
+		y = ((a.y + 1.) * c->target->h) / 2;
 
 		pe_setpos(x, y);
 
 		for (j = 0; j < 3; j++) {
 			int idx;
 
-			idx = arr[(j + 1) % 3];
+			// Traverse each vertex of triangle
+			idx = f->arr[(j + 1) % 3];
 
 			a = *(struct vec4 *)dbuf_get(c->vertex, idx - 1);
 			a.w = 1.0;
 			a = mat4vec(c->worldmat, a);
-			x = ((a.x + 1.) * c->target->h) / 2;
-			y = ((a.y + 1.) * c->target->w) / 2;
+			x = ((a.x + 1.) * c->target->w) / 2;
+			y = ((a.y + 1.) * c->target->h) / 2;
 
 			pe_lineto(c->target, x, y);
 		}

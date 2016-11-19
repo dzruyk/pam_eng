@@ -40,7 +40,7 @@ main(int argc, const char *argv[])
 
 	obj_loader_init(&obj);
 
-	load_obj(&obj, argv[1]);
+	obj_loader_load(&obj, argv[1]);
 
 	if (pe_createsur(&sur, 720, 480, SF_RGB24) < 0) {
 		return (-1);
@@ -50,6 +50,8 @@ main(int argc, const char *argv[])
 	pe_settarget(&context, &sur);
 	pe_setvertex(&context, (const dbuf *) &(obj.vertexes));
 	pe_setindex(&context, (const dbuf *) &(obj.faces));
+
+	obj_loader_normalize(&obj);
 
 	pe_render(&context);
 

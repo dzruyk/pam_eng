@@ -1,9 +1,11 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include <cairo/cairo.h>
 
 #include "surface.h"
+#include "macros.h"
 
 int linex0 = 0;
 int liney0 = 0;
@@ -18,6 +20,7 @@ int pe_fmtgetchans(enum SURFMT fmt)
 	case SF_RGB32:
 		return 4;
 	default:
+		SHOULDNT_REACH();
 		return (-1);
 	}
 }
