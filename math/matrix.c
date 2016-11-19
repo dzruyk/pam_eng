@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "dbuf.h"
 #include "shapes.h"
 #include "matrix.h"
 

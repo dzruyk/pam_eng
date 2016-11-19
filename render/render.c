@@ -126,13 +126,13 @@ wiredrender(const struct pe_context *c)
 {
 	int i, j;
 
-	for (i = 0; i < c->index->length; i++) {
-		struct vec3int *f;
+	for (i = 0; i < c->index->length; i += 3) {
+		int *pidx;
 		struct vec4 a;
 		int x, y;
 
-		f = dbuf_get(c->index, i);
-		a = *(struct vec4 *)dbuf_get(c->vertex, f->x - 1);
+		pidx = dbuf_get(c->index, i);
+		a = *(struct vec4 *)dbuf_get(c->vertex, pidx[0] - 1);
 		a.w = 1.0;
 		a = mat4vec(c->worldmat, a);
 
@@ -145,7 +145,7 @@ wiredrender(const struct pe_context *c)
 			int idx;
 
 			// Traverse each vertex of triangle
-			idx = f->arr[(j + 1) % 3];
+			idx = pidx[(j + 1) % 3];
 
 			a = *(struct vec4 *)dbuf_get(c->vertex, idx - 1);
 			a.w = 1.0;

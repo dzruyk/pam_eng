@@ -19,31 +19,22 @@ struct
 	int flag;                   /* flag == TRUE, if data wasn't allocated */
 } dbuf;
 
-int
-dbuf_init(dbuf *Dbuf, int size);
+int dbuf_init(dbuf *Dbuf, int size);
 
-void
-dbuf_initarr(dbuf *Dbuf, unsigned char *arr, int length, int size);
+void dbuf_initarr(dbuf *Dbuf, unsigned char *arr, int length, int size);
 
-int
-dbuf_len(const dbuf *Dbuf);
+int dbuf_len(const dbuf *Dbuf);
 
-void*
-dbuf_getarr(const dbuf *Dbuf);
+void *dbuf_getarr(const dbuf *Dbuf);
 
-void*
-dbuf_get(const dbuf *Dbuf, int index);
+void *dbuf_get(const dbuf *Dbuf, int index);
 
-void
-dbuf_set(dbuf *Dbuf, int index, void *value);
+void dbuf_set(dbuf *Dbuf, int index, void *value);
 
-int
-dbuf_push(dbuf *Dbuf, void *value);
+int dbuf_push(dbuf *Dbuf, void *value);
 
-void*
-dbuf_pop(dbuf *Dbuf);
+void *dbuf_pop(dbuf *Dbuf);
 
-void
-dbuf_free(dbuf *Dbuf);
+void dbuf_free(dbuf *Dbuf);
 
 #endif

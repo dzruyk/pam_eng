@@ -33,14 +33,14 @@ main(int argc, const char *argv[])
 {
 	struct pe_context context;
 	struct pe_surface sur;
-	obj_loader obj;
+	struct mesh m;
 
 	if (argc < 3)
 		usage(argv[0]);
 
-	obj_loader_init(&obj);
+	mesh_init(&m);
 
-	obj_loader_load(&obj, argv[1]);
+	obj_loader_load(&m, argv[1]);
 
 	if (pe_createsur(&sur, 720, 480, SF_RGB24) < 0) {
 		return (-1);
@@ -48,14 +48,14 @@ main(int argc, const char *argv[])
 
 	pe_initcontext(&context);
 	pe_settarget(&context, &sur);
-	pe_setvertex(&context, (const dbuf *) &(obj.vertexes));
-	pe_setindex(&context, (const dbuf *) &(obj.faces));
+	pe_setvertex(&context, (const dbuf *) &(m.vertex));
+	pe_setindex(&context, (const dbuf *) &(m.idx));
 
-	obj_loader_normalize(&obj);
+	mesh_normalize(&m);
 
 	pe_render(&context);
 
-	obj_loader_finalize(&obj);
+	mesh_finalize(&m);
 
 	pe_writesur(&sur, argv[2]);
 

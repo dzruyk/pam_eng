@@ -33,37 +33,26 @@ struct pe_context
 	const dbuf *index;
 };
 
-int
-pe_initcontext(struct pe_context *c);
+int pe_initcontext(struct pe_context *c);
 
-int
-pe_settarget(struct pe_context *c, struct pe_surface *sur);
+int pe_settarget(struct pe_context *c, struct pe_surface *sur);
 
-int
-pe_setconfig(struct pe_context *c, const struct pe_contextconf *conf);
+int pe_setconfig(struct pe_context *c, const struct pe_contextconf *conf);
 
-int
-pe_destroycontext(struct pe_context *c);
+int pe_destroycontext(struct pe_context *c);
 
-int
-pe_setworldmatrix(struct pe_context *c, struct mat4 *m);
+int pe_setworldmatrix(struct pe_context *c, struct mat4 *m);
 
-int
-pe_setperspmatrix(struct pe_context *c, struct mat4 *m);
+int pe_setperspmatrix(struct pe_context *c, struct mat4 *m);
 
-int
-pe_setvertex(struct pe_context *c, const dbuf *v);
+int pe_setvertex(struct pe_context *c, const dbuf *v);
 
-int
-pe_setindex(struct pe_context *c, const dbuf *idx);
+int pe_setindex(struct pe_context *c, const dbuf *idx);
 
-int
-pe_setmaterial(struct pe_context *c, const struct pe_material *mat);
+int pe_setmaterial(struct pe_context *c, const struct pe_material *mat);
 
-int
-pe_settexture(struct pe_context *c, const struct pe_surface *sur);
+int pe_settexture(struct pe_context *c, const struct pe_surface *sur);
 
-int
-pe_render(struct pe_context *c);
+int pe_render(struct pe_context *c);
 
 #endif

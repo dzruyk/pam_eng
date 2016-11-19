@@ -1,9 +1,9 @@
 CC=gcc
-CFLAGS=-Wall -I./include
+CFLAGS=-Wall -I./include -ggdb
 BIN=runit
 LDFLAGS=-lcairo -lm
 OBJS=main.o core/dbuf.o render/render.o math/matrix.o utils/obj_loader.o \
-render/surface.o
+render/surface.o utils/mesh.o
 
 all: $(BIN)
 
