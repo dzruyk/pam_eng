@@ -102,9 +102,9 @@ struct mat3 *mat3identity(struct mat3 *res);
 
 struct mat3 *mat3rotate(struct mat3 *res, double angle, dimension_t dimension);
 
-struct mat3 *mat3scale(struct mat3 *res, double a, double b);
+struct mat3 *mat3scale(struct mat3 *res, double x, double y);
 
-struct mat3 *mat3move(struct mat3 *res, double a, double b);
+struct mat3 *mat3move(struct mat3 *res, double x, double y);
 
 struct mat4 *mat4init(struct mat4 *res, const double *arr);
 
@@ -116,8 +116,8 @@ struct mat4 *mat4identity(struct mat4 *res);
 
 struct mat4 *mat4rotate(struct mat4 *res, double angle,  dimension_t dimension);
 
-struct mat4 *mat4move(struct mat4 *res, double a, double b, double c);
+struct mat4 *mat4move(struct mat4 *res, double x, double y, double z);
 
-struct mat4 *mat4scale(struct mat4 *res, double a, double b, double c);
+struct mat4 *mat4scale(struct mat4 *res, double x, double y, double z);
 
 #endif

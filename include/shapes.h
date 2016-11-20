@@ -4,10 +4,6 @@
 #include "dbuf.h"
 #include "matrix.h"
 
-struct triangle {
-	struct vec3 points[3];
-};
-
 enum edge_type {
 	TRIANGLE = 0,
 };
@@ -23,6 +19,6 @@ void mesh_init(struct mesh *m);
 
 void mesh_normalize(struct mesh *m);
 
-void mesh_finalize(struct mesh *m);
+void mesh_clean(struct mesh *m);
 
 #endif

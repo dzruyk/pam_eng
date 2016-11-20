@@ -63,7 +63,7 @@ mesh_normalize(struct mesh *m)
 }
 
 void
-mesh_finalize(struct mesh *m)
+mesh_clean(struct mesh *m)
 {
 	dbuf_free(&m->vertex);
 	dbuf_free(&m->idx);
