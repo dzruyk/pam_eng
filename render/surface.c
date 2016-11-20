@@ -111,19 +111,17 @@ int pe_lineto(struct pe_surface *sur, int x1, int y1,
 	signy = liney0 < y1 ? 1 : -1;
 	error = deltax - deltay;
 
-//	printf("%d %d %d %d\n", linex0, liney0, x1, y1);
-
 	while (linex0 != x1 || liney0 != y1) {
 		int error2;
 
-
-//		printf("%d %d %d %d\n", linex0, liney0, x1, y1);
-
 		if (linex0 >= 0 && linex0 < sur->w
 			&& liney0 >= 0 && liney0 < sur->h) {
-			sur->data[(liney0 * sur->w + linex0) * 3 + 0] = 255;
-			sur->data[(liney0 * sur->w + linex0) * 3 + 1] = 255;
-			sur->data[(liney0 * sur->w + linex0) * 3 + 2] = 255;
+			sur->data[(liney0 * sur->w + linex0) * 3 + 0]
+				= c->r * 255.0;
+			sur->data[(liney0 * sur->w + linex0) * 3 + 1]
+				= c->g * 255.0;
+			sur->data[(liney0 * sur->w + linex0) * 3 + 2]
+				= c->b * 255.0;
 		}
 
 		error2 = error * 2;

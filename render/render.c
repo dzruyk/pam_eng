@@ -1,5 +1,7 @@
 #include "render.h"
 
+struct pe_material pe_defmat = { {1.0, 1.0, 1.0, 1.0} };
+
 void
 pe_safefree(void **p)
 {
@@ -17,7 +19,7 @@ pe_initcontext(struct pe_context *c)
 	mat4identity(&c->worldmat);
 	mat4identity(&c->perspmat);
 
-	c->mat = NULL;
+	c->mat = &pe_defmat;
 	c->texture = NULL;
 
 	c->vertex = NULL;
@@ -155,7 +157,6 @@ wiredrender(const struct pe_context *c)
 
 			pe_lineto(c->target, x, y, &(c->mat->color));
 		}
-
 	}
 
 	return 0;

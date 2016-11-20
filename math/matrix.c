@@ -135,20 +135,20 @@ mat3rotate(struct mat3 *res, double angle, dimension_t dimension)
 }
 
 struct mat3 *
-mat3scale(struct mat3 *res, double a, double b)
+mat3scale(struct mat3 *res, double x, double y)
 {
-	res->_11 = a; res->_12 = 0; res->_13 = 0;
-	res->_21 = 0; res->_22 = b; res->_23 = 0;
+	res->_11 = x; res->_12 = 0; res->_13 = 0;
+	res->_21 = 0; res->_22 = y; res->_23 = 0;
 	res->_31 = 0; res->_32 = 0; res->_33 = 1;
 
 	return res;
 }
 
 struct mat3 *
-mat3move(struct mat3 *res, double a, double b)
+mat3move(struct mat3 *res, double x, double y)
 {
-	res->_11 = 1; res->_12 = 0; res->_13 = a;
-	res->_21 = 0; res->_22 = 1; res->_23 = b;
+	res->_11 = 1; res->_12 = 0; res->_13 = x;
+	res->_21 = 0; res->_22 = 1; res->_23 = y;
 	res->_31 = 0; res->_32 = 0; res->_33 = 1;
 
 	return res;
@@ -248,22 +248,22 @@ mat4rotate(struct mat4 *res, double angle,  dimension_t dimension)
 }
 
 struct mat4 *
-mat4move(struct mat4 *res, double a, double b, double c)
+mat4move(struct mat4 *res, double x, double y, double z)
 {
-	res->_11 = 1; res->_12 = 0; res->_13 = 0; res->_14 = a;
-	res->_21 = 0; res->_22 = 1; res->_23 = 0; res->_24 = b;
-	res->_31 = 0; res->_32 = 0; res->_33 = 1; res->_34 = c;
+	res->_11 = 1; res->_12 = 0; res->_13 = 0; res->_14 = x;
+	res->_21 = 0; res->_22 = 1; res->_23 = 0; res->_24 = y;
+	res->_31 = 0; res->_32 = 0; res->_33 = 1; res->_34 = z;
 	res->_41 = 0; res->_42 = 0; res->_43 = 0; res->_44 = 1;
 
 	return res;
 }
 
 struct mat4 *
-mat4scale(struct mat4 *res, double a, double b, double c)
+mat4scale(struct mat4 *res, double x, double y, double z)
 {
-	res->_11 = a; res->_12 = 0; res->_13 = 0; res->_14 = 0;
-	res->_21 = 0; res->_22 = b; res->_23 = 0; res->_24 = 0;
-	res->_31 = 0; res->_32 = 0; res->_33 = c; res->_34 = 0;
+	res->_11 = x; res->_12 = 0; res->_13 = 0; res->_14 = 0;
+	res->_21 = 0; res->_22 = y; res->_23 = 0; res->_24 = 0;
+	res->_31 = 0; res->_32 = 0; res->_33 = z; res->_34 = 0;
 	res->_41 = 0; res->_42 = 0; res->_43 = 0; res->_44 = 1;
 
 	return res;
