@@ -1,5 +1,5 @@
-#ifndef MACROS_H_
-#define MACROS_H_
+#ifndef __MACROS_H__
+#define __MACROS_H__
 
 #ifndef FALSE
 #define FALSE (0)

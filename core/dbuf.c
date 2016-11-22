@@ -5,18 +5,19 @@
 
 #include "dbuf.h"
 
-
 int
-dbuf_init(dbuf *Dbuf, int size) {
+dbuf_init(struct dbuf *Dbuf, int size)
+{
+	unsigned char *tmp;
 
 	Dbuf->size = size;
 	Dbuf->length = 0;
 	Dbuf->capacity = DBUF_CAPACITY;
 	Dbuf->flag = 0;
 
-	unsigned char *tmp = malloc(Dbuf->size * Dbuf->capacity);
+	tmp = malloc(Dbuf->size * Dbuf->capacity);
 
-	if (tmp == NULL)               /* malloc returned no memory signal */
+	if (tmp == NULL) /* malloc returned no memory signal */
 		return 1;
 
 	Dbuf->data = tmp;
@@ -25,95 +26,93 @@ dbuf_init(dbuf *Dbuf, int size) {
 }
 
 void
-dbuf_initarr(dbuf *Dbuf, unsigned char *arr, int length, int size) {
+dbuf_initarr(struct dbuf *db, unsigned char *arr, int length, int size) {
 
         assert(arr != NULL);
 
-        Dbuf->length = length;
-        Dbuf->capacity = length - 1;
-        Dbuf->flag = 1;
-        Dbuf->size = size;
+        db->length = length;
+        db->capacity = length - 1;
+        db->flag = 1;
+        db->size = size;
 
-        Dbuf->data = arr;
+        db->data = arr;
 }
 
 int
-dbuf_len(const dbuf *Dbuf) {
+dbuf_len(const struct dbuf *db)
+{
+	assert(db != NULL);
 
-	assert(Dbuf != NULL);
-
-	return Dbuf->length;
+	return db->length;
 }
 
-void*
-dbuf_getarr(const dbuf *Dbuf) {
+void *
+dbuf_getarr(const struct dbuf *db)
+{
+	assert(db != NULL);
 
-	assert(Dbuf != NULL);
-
-	return Dbuf->data;
+	return db->data;
 }
 
-void*
-dbuf_get(const dbuf *Dbuf, int index) {
-
-	assert(Dbuf != NULL);
+void *
+dbuf_get(const struct dbuf *db, int index)
+{
+	assert(db != NULL);
 	assert(-1 < index);
-	assert(index < Dbuf->length);
+	assert(index < db->length);
 
-	return Dbuf->data + index * Dbuf->size;
+	return db->data + index * db->size;
 }
 
 void
-dbuf_set(dbuf *Dbuf, int index, void *value) {
-
-	assert(Dbuf != NULL);
+dbuf_set(struct dbuf *db, int index, void *value)
+{
+	assert(db != NULL);
 	assert(0 <= index);
-	assert(index < Dbuf->length);
+	assert(index < db->length);
 
-	memcpy(Dbuf->data + index * Dbuf->size, value, Dbuf->size);
+	memcpy(db->data + index * db->size, value, db->size);
 }
 
 int
-dbuf_push(dbuf *Dbuf, void *value) {
+dbuf_push(struct dbuf *db, void *value)
+{
+	assert(db != NULL);
 
-	assert(Dbuf != NULL);
-
-	if (Dbuf->length == Dbuf->capacity) {
-
-		if (Dbuf->flag)
-			return 1;		/* can't reallocate given array */
-
+	if (db->length == db->capacity) {
 		unsigned char *tmp;
 
-		Dbuf->capacity *= DBUF_CAPACITY_GROWTH;
-		tmp = realloc(Dbuf->data, Dbuf->size * Dbuf->capacity);
+		if (db->flag)
+			return 1; /* can't reallocate given array */
+
+		db->capacity *= DBUF_CAPACITY_GROWTH;
+		tmp = realloc(db->data, db->size * db->capacity);
 
 		if (!tmp)
-			return 1;		/* realloc returned no memory signal */
+			return 1; /* realloc returned no memory signal */
 
-		Dbuf->data = tmp;
-
+		db->data = tmp;
 	}
 
-	dbuf_set(Dbuf, Dbuf->length++, value);
+	dbuf_set(db, db->length++, value);
 
 	return 0;
 }
 
-void*
-dbuf_pop(dbuf *Dbuf) {
+void *
+dbuf_pop(struct dbuf *db)
+{
+	assert(db != NULL);
+	assert(db->length != 0);
 
-	assert(Dbuf != NULL);
-	assert(Dbuf->length != 0);
-
-	return Dbuf->data + Dbuf->length-- * Dbuf->size;
+	return db->data + db->length-- * db->size;
 }
 
 void
-dbuf_free(dbuf *Dbuf) {
+dbuf_free(struct dbuf *db)
+{
+	assert(db != NULL);
+	assert(db->data != NULL);
 
-	assert(Dbuf != NULL);
-	assert(Dbuf->data != NULL);
-
-	free(Dbuf->data);
+	free(db->data);
 }

@@ -1,5 +1,5 @@
-#ifndef _MATRIX_H_
-#define _MATRIX_H_
+#ifndef __MATRIX_H__
+#define __MATRIX_H__
 
 typedef enum  {
 	DIM_X = 0,

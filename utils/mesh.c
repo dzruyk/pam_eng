@@ -2,17 +2,17 @@
 #include <stdlib.h>
 
 #include "dbuf.h"
-#include "shapes.h"
+#include "mesh.h"
 
 void
-mesh_init(struct mesh *m)
+pe_meshinit(struct mesh *m)
 {
 	dbuf_init(&m->vertex, sizeof(struct vec4));
 	dbuf_init(&m->idx, sizeof(int));
 }
 
 void
-mesh_normalize(struct mesh *m)
+pe_meshnormalize(struct mesh *m)
 {
 	int i, nverts;
 	struct vec4 *v;
@@ -63,7 +63,7 @@ mesh_normalize(struct mesh *m)
 }
 
 void
-mesh_clean(struct mesh *m)
+pe_meshclean(struct mesh *m)
 {
 	dbuf_free(&m->vertex);
 	dbuf_free(&m->idx);

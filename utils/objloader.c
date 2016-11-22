@@ -4,8 +4,8 @@
 #include <string.h>
 
 #include "macros.h"
-#include "shapes.h"
-#include "obj_loader.h"
+#include "mesh.h"
+#include "objloader.h"
 
 #define BUFSZ 1024
 
@@ -13,7 +13,7 @@ static void parse_vertex(const char *line, struct vec4 *v);
 static void parse_face(const char *line, struct vec3int *v);
 
 void
-obj_loader_load(struct mesh *m, const char *fname)
+pe_objload(struct mesh *m, const char *fname)
 {
 	FILE *fp;
 	char buf[BUFSZ];

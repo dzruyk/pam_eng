@@ -1,5 +1,5 @@
-#ifndef SURFACE_H
-#define SURFACE_H
+#ifndef __SURFACE_H__
+#define __SURFACE_H__
 
 struct pe_color {
 	double r;
