@@ -1,5 +1,5 @@
-#ifndef RENDER_H
-#define RENDER_H
+#ifndef __RENDER_H__
+#define __RENDER_H__
 
 #include <stdlib.h>
 
@@ -28,8 +28,8 @@ struct pe_context
 	const struct pe_material *mat;
 	const struct pe_surface *texture;
 
-	const dbuf *vertex;
-	const dbuf *index;
+	const struct dbuf *vertex;
+	const struct dbuf *index;
 };
 
 int pe_initcontext(struct pe_context *c);
@@ -44,9 +44,9 @@ int pe_setworldmatrix(struct pe_context *c, struct mat4 *m);
 
 int pe_setperspmatrix(struct pe_context *c, struct mat4 *m);
 
-int pe_setvertex(struct pe_context *c, const dbuf *v);
+int pe_setvertex(struct pe_context *c, const struct dbuf *v);
 
-int pe_setindex(struct pe_context *c, const dbuf *idx);
+int pe_setindex(struct pe_context *c, const struct dbuf *idx);
 
 int pe_setmaterial(struct pe_context *c, const struct pe_material *mat);
 

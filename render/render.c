@@ -79,7 +79,7 @@ pe_setperspmatrix(struct pe_context *c, struct mat4 *m)
 }
 
 int
-pe_setvertex(struct pe_context *c, const dbuf *v)
+pe_setvertex(struct pe_context *c, const struct dbuf *v)
 {
 	if (c == NULL || v == NULL)
 		return (-1);
@@ -90,7 +90,7 @@ pe_setvertex(struct pe_context *c, const dbuf *v)
 }
 
 int
-pe_setindex(struct pe_context *c, const dbuf *idx)
+pe_setindex(struct pe_context *c, const struct dbuf *idx)
 {
 	if (c == NULL || idx == NULL)
 		return (-1);

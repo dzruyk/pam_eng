@@ -5,9 +5,7 @@
 
 #include "dbuf.h"
 #include "macros.h"
-#include "shapes.h"
 #include "matrix.h"
-
 
 struct mat2 *
 mat2init(struct mat2 *res, const double *arr)

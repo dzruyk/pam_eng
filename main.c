@@ -3,9 +3,9 @@
 
 #include <libgen.h>
 
-#include "obj_loader.h"
+#include "objloader.h"
 #include "macros.h"
-#include "shapes.h"
+#include "mesh.h"
 #include "matrix.h"
 #include "render.h"
 
@@ -39,9 +39,9 @@ main(int argc, const char *argv[])
 	if (argc < 3)
 		usage(argv[0]);
 
-	mesh_init(&m);
+	pe_meshinit(&m);
 
-	obj_loader_load(&m, argv[1]);
+	pe_objload(&m, argv[1]);
 
 	if (pe_createsur(&sur, 720, 480, SF_RGB24) < 0) {
 		return (-1);
@@ -54,15 +54,15 @@ main(int argc, const char *argv[])
 
 	pe_initcontext(&context);
 	pe_settarget(&context, &sur);
-	pe_setvertex(&context, (const dbuf *) &(m.vertex));
-	pe_setindex(&context, (const dbuf *) &(m.idx));
+	pe_setvertex(&context, (const struct dbuf *) &(m.vertex));
+	pe_setindex(&context, (const struct dbuf *) &(m.idx));
 	pe_setmaterial(&context, &mat);
 
-	mesh_normalize(&m);
+	pe_meshnormalize(&m);
 
 	pe_render(&context);
 
-	mesh_clean(&m);
+	pe_meshclean(&m);
 
 	pe_writesur(&sur, argv[2]);
 
