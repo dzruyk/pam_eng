@@ -76,7 +76,9 @@ initgui(struct xdata *guidata, int w, int h)
 
 	mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
 	values[0] = guidata->screen->white_pixel;
-	values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS;
+	values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS
+		| XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_BUTTON_PRESS
+		| XCB_EVENT_MASK_BUTTON_RELEASE;
 
 	xcb_create_window(guidata->connection, 24, guidata->win,
 		guidata->screen->root, 0, 0, w, h, 0,
@@ -92,6 +94,13 @@ initgui(struct xdata *guidata, int w, int h)
 	guidata->sur = cairo_image_surface_create(CAIRO_FORMAT_RGB24, w, h);
 
 	guidata->cr = cairo_create(guidata->xcbsur);
+
+	guidata->defaultcallback = NULL;
+	guidata->drawcallback = NULL;
+	guidata->keypresscallback = NULL;
+	guidata->motioncallback = NULL;
+	guidata->buttonpresscallback = NULL;
+	guidata->buttonreleasecallback = NULL;
 
 	xcb_flush(guidata->connection);
 
@@ -147,7 +156,6 @@ mainloop(struct xdata *guidata, void *userdata)
 		
 		switch (event->response_type & ~0x80) {
 		case XCB_EXPOSE:
-			
 			guidata->drawcallback(guidata->sur, userdata);
 			
 			cairo_set_source_surface(guidata->cr,
@@ -162,15 +170,35 @@ mainloop(struct xdata *guidata, void *userdata)
 			ks = xcb_key_symbols_alloc(guidata->connection);
 
 			keysym = xcb_key_symbols_get_keysym(ks,
-				((struct xcb_key_press_event_t *)
-				event)->detail, 1);
+				((xcb_key_press_event_t *) event)->detail, 1);
 			
 			guidata->keypresscallback(keysym, userdata);
 
 			xcb_key_symbols_free(ks);
 	
 			break;
+		
+		case XCB_MOTION_NOTIFY:
+			guidata->motioncallback(
+				((xcb_motion_notify_event_t *) event)->event_x,
+				((xcb_motion_notify_event_t *) event)->event_y,
+				userdata);
+
+			break;
 	
+		case XCB_BUTTON_PRESS:
+			guidata->buttonpresscallback(
+				((xcb_button_press_event_t *)event)->detail,
+				userdata);
+			break;
+
+	
+		case XCB_BUTTON_RELEASE:
+				guidata->buttonreleasecallback(
+				((xcb_button_press_event_t *)event)->detail,
+				userdata);
+			break;
+		
 		default:
 			break;
 		}

@@ -221,22 +221,22 @@ mat4rotate(struct mat4 *res, double angle,  dimension_t dimension)
 
 	switch (dimension) {
 	case DIM_X:
-		res->_11 = c; res->_12 = -s; res->_13 = 0; res->_14 = 0;
-		res->_21 = s; res->_22 =  c; res->_23 = 0; res->_24 = 0;
-		res->_31 = 0; res->_32 =  0; res->_33 = 1; res->_34 = 0;
-		res->_41 = 0; res->_42 =  0; res->_43 = 0; res->_44 = 1;
+		res->_11 = 1; res->_12 = 0;  res->_13 = 0; res->_14 = 0;
+		res->_21 = 0; res->_22 = c;  res->_23 = s; res->_24 = 0;
+		res->_31 = 0; res->_32 = -s; res->_33 = c; res->_34 = 0;
+		res->_41 = 0; res->_42 = 0;  res->_43 = 0; res->_44 = 1;
 		break;
 	case DIM_Y:
-		res->_11 = 1; res->_12 = 0; res->_13 =  0; res->_14 = 0;
-		res->_21 = 0; res->_22 = c; res->_23 = -s; res->_24 = 0;
-		res->_31 = 0; res->_32 = s; res->_33 =  c; res->_34 = 0;
-		res->_41 = 0; res->_42 = 0; res->_43 =  0; res->_44 = 1;
+		res->_11 = c;  res->_12 = 0; res->_13 = s; res->_14 = 0;
+		res->_21 = 0;  res->_22 = 1; res->_23 = 0; res->_24 = 0;
+		res->_31 = -s; res->_32 = 0; res->_33 = c; res->_34 = 0;
+		res->_41 = 0;  res->_42 = 0; res->_43 = 0; res->_44 = 1;
 		break;
 	case DIM_Z:
-		res->_11 =  c; res->_12 = 0; res->_13 = s; res->_14 = 0;
-		res->_21 =  0; res->_22 = 1; res->_23 = 0; res->_24 = 0;
-		res->_31 = -s; res->_32 = 0; res->_33 = c; res->_34 = 0;
-		res->_41 =  0; res->_42 = 0; res->_43 = 0; res->_44 = 1;
+		res->_11 = c;  res->_12 = s; res->_13 = 0; res->_14 = 0;
+		res->_21 = -s; res->_22 = c; res->_23 = 0; res->_24 = 0;
+		res->_31 = 0;  res->_32 = 0; res->_33 = 1; res->_34 = 0;
+		res->_41 = 0;  res->_42 = 0; res->_43 = 0; res->_44 = 1;
 		break;
 	default:
 		SHOULDNT_REACH();

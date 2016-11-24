@@ -16,7 +16,10 @@ struct xdata {
 
 	int (*defaultcallback)(void *userdata);
 	int (*drawcallback)(cairo_surface_t *sur, void *userdata);
-	int (*keypresscallback)(xcb_keysym_t keycode, void *userdata);
+	int (*keypresscallback)(xcb_keysym_t keysym, void *userdata);
+	int (*motioncallback)(int x, int y, void *userdata);
+	int (*buttonpresscallback)(xcb_button_t buttoncode, void *userdata);
+	int (*buttonreleasecallback)(xcb_button_t buttoncode, void *userdata);
 };
 
 int initgui(struct xdata *guidata, int w, int h);

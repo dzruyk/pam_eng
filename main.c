@@ -13,10 +13,12 @@
 #include "camera.h"
 #include "gui.h"
 
-char *usg = "usage: %s [OPTS] input.obj output.png\n";
-
 #define SURWIDTH 720
 #define SURHEIGHT 480
+
+char *usg = "usage: %s [OPTS] input.obj output.png\n";
+
+int drag = 0;
 
 struct renderdata {
 	struct pe_context context;
@@ -134,6 +136,47 @@ int keypress(xcb_keysym_t keysym, void *userdata)
 	return 0;
 }
 
+int motion(int x, int y, void *userdata)
+{
+	static int prevx = -1, prevy = -1;
+	
+	struct renderdata *rd;
+	double dx, dy;
+
+	rd = userdata;
+	
+	if (prevx == -1 || prevy == -1) {
+		prevx = x;
+		prevy = y;
+	}
+
+	if (drag) {
+		dx = ((double) prevx - x) / rd->sur.w;
+		dy = ((double) prevy - y) / rd->sur.h;
+
+		pe_camrotate(&(rd->context.worldmat), dy, dx, 0.0);
+	}
+
+	prevx = x;
+	prevy = y;
+
+	return 0;
+}
+
+int buttonpress(xcb_button_t buttoncode, void *userdata)
+{
+	drag = (buttoncode == 1) ? 1 : drag;
+	
+	return 0;
+}
+
+int buttonrelease(xcb_button_t buttoncode, void *userdata)
+{
+	drag = (buttoncode == 1) ? 0 : drag;
+	
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	struct renderdata rd;
@@ -164,6 +207,9 @@ int main(int argc, char **argv)
 	guidata.defaultcallback = render;
 	guidata.drawcallback = draw;
 	guidata.keypresscallback = keypress;
+	guidata.motioncallback = motion;
+	guidata.buttonpresscallback = buttonpress;
+	guidata.buttonreleasecallback = buttonrelease;
 
 	mainloop(&guidata, &rd);
 
