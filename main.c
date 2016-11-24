@@ -25,13 +25,6 @@ struct renderdata {
 	struct pe_surface sur;
 };
 
-struct forrender {
-	struct renderdata rd;
-	xcb_connection_t *xcbconnection;
-	xcb_window_t *xcbwin;
-};
-
-
 void
 usage(const char *progpath)
 {
@@ -98,13 +91,45 @@ int draw(cairo_surface_t *sur, void *userdata)
 	return 0;
 }
 
-int keypress(int keycode, void *userdata)
+int keypress(xcb_keysym_t keysym, void *userdata)
 {
 	struct renderdata *rd;
+	double movedelta;
 	
 	rd = userdata;
 
-	pe_cammove(&(rd->context.worldmat), 0.01, 0.0, 0.0);
+	movedelta = 0.01;
+
+	printf("Keysym: %x\n", keysym);
+	
+	switch(keysym) {
+	case XKB_KEY_W:
+		pe_cammove(&(rd->context.worldmat), 0.0, 0.0, movedelta);
+		break;
+	
+	case XKB_KEY_S:
+		pe_cammove(&(rd->context.worldmat), 0.0, 0.0, -movedelta);
+		break;
+	
+	case XKB_KEY_A:
+		pe_cammove(&(rd->context.worldmat), -movedelta, 0.0, 0.0);
+		break;
+	
+	case XKB_KEY_D:
+		pe_cammove(&(rd->context.worldmat), movedelta, 0.0, 0.0);
+		break;
+
+	case XKB_KEY_Q:
+		pe_cammove(&(rd->context.worldmat), 0.0, -movedelta, 0.0);
+		break;
+
+	case XKB_KEY_E:
+		pe_cammove(&(rd->context.worldmat), 0.0, movedelta, 0.0);
+		break;
+	
+	default:
+		break;
+	}
 
 	return 0;
 }
@@ -123,7 +148,6 @@ int main(int argc, char **argv)
 
 	pe_objload(&(rd.m), argv[1]);
 	
-
 	if (pe_createsur(&(rd.sur), SURWIDTH, SURHEIGHT, SF_RGB24) < 0)
 		return 1;
 

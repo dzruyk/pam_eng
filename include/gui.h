@@ -2,6 +2,7 @@
 #define __GUI_H__
 
 #include <xcb/xcb.h>
+#include <xkbcommon/xkbcommon.h>
 #include <cairo/cairo-xcb.h>
 
 struct xdata {
@@ -15,7 +16,7 @@ struct xdata {
 
 	int (*defaultcallback)(void *userdata);
 	int (*drawcallback)(cairo_surface_t *sur, void *userdata);
-	int (*keypresscallback)(int keycode, void *userdata);
+	int (*keypresscallback)(xcb_keysym_t keycode, void *userdata);
 };
 
 int initgui(struct xdata *guidata, int w, int h);

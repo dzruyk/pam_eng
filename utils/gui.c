@@ -2,6 +2,7 @@
 #include <math.h>
 
 #include <xcb/xcb.h>
+#include <xcb/xcb_keysyms.h>
 #include <cairo/cairo-xcb.h>
 
 #include <sys/time.h>
@@ -125,10 +126,12 @@ windowforceredraw(xcb_connection_t *c, xcb_window_t *win)
 int
 mainloop(struct xdata *guidata, void *userdata)
 {
-	xcb_generic_event_t *event;
-	sigset_t oldmask;
-
 	while (1) {
+		xcb_generic_event_t *event;
+		sigset_t oldmask;
+		xcb_key_symbols_t *ks;
+		xcb_keysym_t keysym;
+
 		event = xcb_poll_for_event(guidata->connection);
 		
 		if (event == NULL) {
@@ -147,7 +150,6 @@ mainloop(struct xdata *guidata, void *userdata)
 			
 			guidata->drawcallback(guidata->sur, userdata);
 			
-			
 			cairo_set_source_surface(guidata->cr,
 				guidata->sur, 0, 0);
 			cairo_paint(guidata->cr);
@@ -157,10 +159,15 @@ mainloop(struct xdata *guidata, void *userdata)
 			break;
 	
 		case XCB_KEY_PRESS:
-			guidata->keypresscallback(
+			ks = xcb_key_symbols_alloc(guidata->connection);
+
+			keysym = xcb_key_symbols_get_keysym(ks,
 				((struct xcb_key_press_event_t *)
-				event)->detail,
-				userdata);
+				event)->detail, 1);
+			
+			guidata->keypresscallback(keysym, userdata);
+
+			xcb_key_symbols_free(ks);
 	
 			break;
 	
