@@ -120,4 +120,6 @@ struct mat4 *mat4move(struct mat4 *res, double x, double y, double z);
 
 struct mat4 *mat4scale(struct mat4 *res, double x, double y, double z);
 
+struct mat4 *mat4persp(struct mat4 *res, double n_pl, double f_pl, double fov_x, double fov_y);
+
 #endif

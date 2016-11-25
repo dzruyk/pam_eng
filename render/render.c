@@ -136,7 +136,10 @@ wiredrender(const struct pe_context *c)
 		pa = dbuf_get(c->vertex, pidx[0] - 1);
 		pa->w = 1.0;
 
-		pa = mat4vec(&tmp, &c->worldmat, pa);
+		struct mat4 res, xx = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		mat4persp(&res, 1, 8, 2, 2);
+
+		pa = mat4vec(&tmp, mat4mult(&xx, &c->worldmat, &res), pa);
 
 		x = ((pa->x + 1.) * c->target->w) / 2;
 		y = ((pa->y + 1.) * c->target->h) / 2;
@@ -151,7 +154,7 @@ wiredrender(const struct pe_context *c)
 
 			pa = dbuf_get(c->vertex, idx - 1);
 			pa->w = 1.0;
-			pa = mat4vec(&tmp, &c->worldmat, pa);
+			pa = mat4vec(&tmp, mat4mult(&xx, &c->worldmat, &res), pa);
 			x = ((pa->x + 1.) * c->target->w) / 2;
 			y = ((pa->y + 1.) * c->target->h) / 2;
 

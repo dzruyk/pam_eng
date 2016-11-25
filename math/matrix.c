@@ -267,3 +267,19 @@ mat4scale(struct mat4 *res, double x, double y, double z)
 	return res;
 }
 
+
+struct mat4 *
+mat4persp(struct mat4 *res, double n_pl, double f_pl, double fov_x, double fov_y)
+{
+	double w, h, q;
+	w = 1. / tan(fov_x * 0.5);
+	h = 1. / tan(fov_y * 0.5);
+	q = f_pl / (f_pl - n_pl);
+
+	res->_11 = w; res->_12 = 0; res->_13 = 0        ; res->_14 = 0;
+	res->_21 = 0; res->_22 = h; res->_23 = 0        ; res->_24 = 0;
+	res->_31 = 0; res->_32 = 0; res->_33 = q        ; res->_34 = 1;
+	res->_41 = 0; res->_42 = 0; res->_43 = -q * n_pl; res->_44 = 0;
+
+	return res;
+}
