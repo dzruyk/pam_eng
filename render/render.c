@@ -73,7 +73,7 @@ pe_setperspmatrix(struct pe_context *c, struct mat4 *m)
 	if (c == NULL || m == NULL)
 		return (-1);
 
-	c->worldmat = *m;
+	c->perspmat = *m;
 
 	return 0;
 }
@@ -126,6 +126,12 @@ static int
 wiredrender(const struct pe_context *c)
 {
 	int i, j;
+	int objsz;
+
+	objsz = c->target->w;
+
+	if (c->target->h < objsz)
+		objsz = c->target->h;
 
 	for (i = 0; i < c->index->length; i += 3) {
 		int *pidx;
@@ -138,8 +144,8 @@ wiredrender(const struct pe_context *c)
 
 		pa = mat4vec(&tmp, &c->worldmat, pa);
 
-		x = ((pa->x + 1.) * c->target->w) / 2;
-		y = ((pa->y + 1.) * c->target->h) / 2;
+		x = ((pa->x + 1.) * objsz) / 2;
+		y = ((pa->y + 1.) * objsz) / 2;
 
 		pe_setpos(x, y);
 
@@ -152,8 +158,8 @@ wiredrender(const struct pe_context *c)
 			pa = dbuf_get(c->vertex, idx - 1);
 			pa->w = 1.0;
 			pa = mat4vec(&tmp, &c->worldmat, pa);
-			x = ((pa->x + 1.) * c->target->w) / 2;
-			y = ((pa->y + 1.) * c->target->h) / 2;
+			x = ((pa->x + 1.) * objsz) / 2;
+			y = ((pa->y + 1.) * objsz) / 2;
 
 			pe_lineto(c->target, x, y, &(c->mat->color));
 		}

@@ -16,7 +16,7 @@
 #define SURWIDTH 720
 #define SURHEIGHT 480
 
-char *usg = "usage: %s [OPTS] input.obj output.png\n";
+char *usg = "usage: %s [OPTS] input.obj\n";
 
 int drag = 0;
 
@@ -47,11 +47,11 @@ usage(const char *progpath)
 int render(void *userdata)
 {
 	struct renderdata *rd;
-	
+
 	rd = userdata;
 
 	pe_fillsur(rd->context.target, 0.0, 0.0, 0.0);
-	
+
 	pe_setvertex(&(rd->context),
 		(const struct dbuf *) &(rd->m.vertex));
 	pe_setindex(&(rd->context),
@@ -79,10 +79,10 @@ int draw(cairo_surface_t *sur, void *userdata)
 	for (i = 0; i < surh; ++i) {
 		unsigned char *inputline;
 		unsigned char *outputline;
-	
+
 		inputline = surdata + i * surw * 4;
 		outputline = rd->sur.data + (surh - i - 1) * surw * 3;
-		
+
 		for (j = 0; j < surw; ++j) {
 			inputline[j * 4 + 0] = outputline[j * 3 + 2];
 			inputline[j * 4 + 1] = outputline[j * 3 + 1];
@@ -97,26 +97,26 @@ int keypress(xcb_keysym_t keysym, void *userdata)
 {
 	struct renderdata *rd;
 	double movedelta;
-	
+
 	rd = userdata;
 
 	movedelta = 0.01;
 
 	printf("Keysym: %x\n", keysym);
-	
+
 	switch(keysym) {
 	case XKB_KEY_W:
 		pe_cammove(&(rd->context.worldmat), 0.0, 0.0, movedelta);
 		break;
-	
+
 	case XKB_KEY_S:
 		pe_cammove(&(rd->context.worldmat), 0.0, 0.0, -movedelta);
 		break;
-	
+
 	case XKB_KEY_A:
 		pe_cammove(&(rd->context.worldmat), -movedelta, 0.0, 0.0);
 		break;
-	
+
 	case XKB_KEY_D:
 		pe_cammove(&(rd->context.worldmat), movedelta, 0.0, 0.0);
 		break;
@@ -128,7 +128,7 @@ int keypress(xcb_keysym_t keysym, void *userdata)
 	case XKB_KEY_E:
 		pe_cammove(&(rd->context.worldmat), 0.0, movedelta, 0.0);
 		break;
-	
+
 	default:
 		break;
 	}
@@ -139,12 +139,12 @@ int keypress(xcb_keysym_t keysym, void *userdata)
 int motion(int x, int y, void *userdata)
 {
 	static int prevx = -1, prevy = -1;
-	
+
 	struct renderdata *rd;
 	double dx, dy;
 
 	rd = userdata;
-	
+
 	if (prevx == -1 || prevy == -1) {
 		prevx = x;
 		prevy = y;
@@ -166,14 +166,14 @@ int motion(int x, int y, void *userdata)
 int buttonpress(xcb_button_t buttoncode, void *userdata)
 {
 	drag = (buttoncode == 1) ? 1 : drag;
-	
+
 	return 0;
 }
 
 int buttonrelease(xcb_button_t buttoncode, void *userdata)
 {
 	drag = (buttoncode == 1) ? 0 : drag;
-	
+
 	return 0;
 }
 
@@ -190,7 +190,7 @@ int main(int argc, char **argv)
 	pe_meshinit(&(rd.m));
 
 	pe_objload(&(rd.m), argv[1]);
-	
+
 	if (pe_createsur(&(rd.sur), SURWIDTH, SURHEIGHT, SF_RGB24) < 0)
 		return 1;
 

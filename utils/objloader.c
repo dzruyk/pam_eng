@@ -10,7 +10,7 @@
 #define BUFSZ 1024
 
 static void parse_vertex(const char *line, struct vec4 *v);
-static void parse_face(const char *line, struct vec3int *v);
+static int parse_face(char *line, struct vec3int *v);
 
 void
 pe_objload(struct mesh *m, const char *fname)
@@ -58,15 +58,25 @@ parse_face_row(const char *line, int *p)
 	sscanf(line, "%d", p);
 }
 
-static void
-parse_face(const char *line, struct vec3int *v)
+static int
+parse_face(char *line, struct vec3int *v)
 {
+	int i;
 	char *p;
+	char *d = " \t";
 
-	parse_face_row(line, &v->x);
-	p = strchr(line, ' ');
-	parse_face_row(p + 1, &v->y);
-	p = strchr(p + 1, ' ');
-	parse_face_row(p + 1, &v->z);
+	for (i = 0; i < 3; i++) {
+		p = strtok(line, d);
+		if (p == NULL) {
+			warning("can't find triangle index %d", i);
+			return 1;
+		}
+		parse_face_row(p, &v->arr[i]);
+
+		//set line to NULL, for next strtok(3) calls
+		line = NULL;
+	}
+
+	return 0;
 }
 
