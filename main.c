@@ -44,7 +44,8 @@ usage(const char *progpath)
 	exit(1);
 }
 
-int render(void *userdata)
+int
+render(void *userdata)
 {
 	struct renderdata *rd;
 
@@ -63,7 +64,8 @@ int render(void *userdata)
 	return 0;
 }
 
-int draw(cairo_surface_t *sur, void *userdata)
+int
+draw(cairo_surface_t *sur, void *userdata)
 {
 	struct renderdata *rd;
 	unsigned char *surdata;
@@ -93,7 +95,8 @@ int draw(cairo_surface_t *sur, void *userdata)
 	return 0;
 }
 
-int keypress(xcb_keysym_t keysym, void *userdata)
+int
+keypress(xcb_keysym_t keysym, void *userdata)
 {
 	struct renderdata *rd;
 	double movedelta;
@@ -105,27 +108,27 @@ int keypress(xcb_keysym_t keysym, void *userdata)
 	printf("Keysym: %x\n", keysym);
 
 	switch(keysym) {
-	case XKB_KEY_W:
+	case XKB_KEY_w:
 		pe_cammove(&(rd->context.worldmat), 0.0, 0.0, movedelta);
 		break;
 
-	case XKB_KEY_S:
+	case XKB_KEY_s:
 		pe_cammove(&(rd->context.worldmat), 0.0, 0.0, -movedelta);
 		break;
 
-	case XKB_KEY_A:
+	case XKB_KEY_a:
 		pe_cammove(&(rd->context.worldmat), -movedelta, 0.0, 0.0);
 		break;
 
-	case XKB_KEY_D:
+	case XKB_KEY_d:
 		pe_cammove(&(rd->context.worldmat), movedelta, 0.0, 0.0);
 		break;
 
-	case XKB_KEY_Q:
+	case XKB_KEY_q:
 		pe_cammove(&(rd->context.worldmat), 0.0, -movedelta, 0.0);
 		break;
 
-	case XKB_KEY_E:
+	case XKB_KEY_e:
 		pe_cammove(&(rd->context.worldmat), 0.0, movedelta, 0.0);
 		break;
 
@@ -136,7 +139,8 @@ int keypress(xcb_keysym_t keysym, void *userdata)
 	return 0;
 }
 
-int motion(int x, int y, void *userdata)
+int
+motion(int x, int y, void *userdata)
 {
 	static int prevx = -1, prevy = -1;
 
@@ -163,21 +167,24 @@ int motion(int x, int y, void *userdata)
 	return 0;
 }
 
-int buttonpress(xcb_button_t buttoncode, void *userdata)
+int
+buttonpress(xcb_button_t buttoncode, void *userdata)
 {
 	drag = (buttoncode == 1) ? 1 : drag;
 
 	return 0;
 }
 
-int buttonrelease(xcb_button_t buttoncode, void *userdata)
+int
+buttonrelease(xcb_button_t buttoncode, void *userdata)
 {
 	drag = (buttoncode == 1) ? 0 : drag;
 
 	return 0;
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
 	struct renderdata rd;
 	struct xdata guidata;
@@ -191,6 +198,8 @@ int main(int argc, char **argv)
 
 	pe_objload(&(rd.m), argv[1]);
 
+	pe_meshnormalize(&(rd.m));
+	
 	if (pe_createsur(&(rd.sur), SURWIDTH, SURHEIGHT, SF_RGB24) < 0)
 		return 1;
 
@@ -202,7 +211,6 @@ int main(int argc, char **argv)
 	pe_initcontext(&(rd.context));
 	pe_settarget(&(rd.context), &(rd.sur));
 
-//	pe_meshnormalize(&(rd.m));
 
 	guidata.defaultcallback = render;
 	guidata.drawcallback = draw;

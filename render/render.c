@@ -144,8 +144,8 @@ wiredrender(const struct pe_context *c)
 
 		pa = mat4vec(&tmp, &c->worldmat, pa);
 
-		x = ((pa->x + 1.) * objsz) / 2;
-		y = ((pa->y + 1.) * objsz) / 2;
+		x = (pa->x + 1.0) * c->target->w * 0.5;
+		y = (pa->y + 1.0) * c->target->h * 0.5;
 
 		pe_setpos(x, y);
 
@@ -158,8 +158,9 @@ wiredrender(const struct pe_context *c)
 			pa = dbuf_get(c->vertex, idx - 1);
 			pa->w = 1.0;
 			pa = mat4vec(&tmp, &c->worldmat, pa);
-			x = ((pa->x + 1.) * objsz) / 2;
-			y = ((pa->y + 1.) * objsz) / 2;
+
+			x = (pa->x + 1.0) * c->target->w * 0.5;
+			y = (pa->y + 1.0) * c->target->h * 0.5;
 
 			pe_lineto(c->target, x, y, &(c->mat->color));
 		}

@@ -170,7 +170,7 @@ mainloop(struct xdata *guidata, void *userdata)
 			ks = xcb_key_symbols_alloc(guidata->connection);
 
 			keysym = xcb_key_symbols_get_keysym(ks,
-				((xcb_key_press_event_t *) event)->detail, 1);
+				((xcb_key_press_event_t *) event)->detail, 0);
 
 			guidata->keypresscallback(keysym, userdata);
 
@@ -190,6 +190,7 @@ mainloop(struct xdata *guidata, void *userdata)
 			guidata->buttonpresscallback(
 				((xcb_button_press_event_t *)event)->detail,
 				userdata);
+
 			break;
 
 
@@ -197,6 +198,7 @@ mainloop(struct xdata *guidata, void *userdata)
 				guidata->buttonreleasecallback(
 				((xcb_button_press_event_t *)event)->detail,
 				userdata);
+
 			break;
 
 		default:
