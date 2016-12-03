@@ -84,42 +84,29 @@ struct vec3int {
 	};
 };
 
-struct mat2 *mat2init(struct mat2 *res, const double *arr);
-
-struct mat2 *mat2mult(struct mat2 *res, const struct mat2 *a, const struct mat2 *b);
-
-struct vec2 *mat2vec(struct vec2 *res, const struct mat2 *a, const struct vec2 *b);
-
 struct mat2 *mat2identity(struct mat2 *res);
-
-struct mat3 *mat3init(struct mat3 *res, const double *arr);
-
-struct mat3 *mat3mult(struct mat3 *res, const struct mat3 *a, const struct mat3 *b);
-
-struct vec3 *mat3vec(struct vec3 *res, const struct mat3 *a, const struct vec3 *b);
+struct mat2 *mat2init(struct mat2 *res, const double *arr);
+struct mat2 *mat2mult(struct mat2 *res, const struct mat2 *a, const struct mat2 *b);
+struct vec2 *mat2vec(struct vec2 *res, const struct mat2 *a, const struct vec2 *b);
+struct mat2 *mat2transpose(struct mat2 *res, const struct mat2 *src);
 
 struct mat3 *mat3identity(struct mat3 *res);
-
+struct mat3 *mat3init(struct mat3 *res, const double *arr);
+struct mat3 *mat3mult(struct mat3 *res, const struct mat3 *a, const struct mat3 *b);
+struct vec3 *mat3vec(struct vec3 *res, const struct mat3 *a, const struct vec3 *b);
 struct mat3 *mat3rotate(struct mat3 *res, double angle, dimension_t dimension);
-
 struct mat3 *mat3scale(struct mat3 *res, double x, double y);
-
+struct mat3 *mat3transpose(struct mat3 *res, const struct mat3 *src);
 struct mat3 *mat3move(struct mat3 *res, double x, double y);
 
-struct mat4 *mat4init(struct mat4 *res, const double *arr);
-
-struct mat4 *mat4mult(struct mat4 *res, const struct mat4 *a, const struct mat4 *b);
-
-struct vec4 *mat4vec(struct vec4 *res, const struct mat4 *a, const struct vec4 *b);
-
 struct mat4 *mat4identity(struct mat4 *res);
-
+struct mat4 *mat4init(struct mat4 *res, const double *arr);
+struct mat4 *mat4mult(struct mat4 *res, const struct mat4 *a, const struct mat4 *b);
+struct vec4 *mat4vec(struct vec4 *res, const struct mat4 *a, const struct vec4 *b);
 struct mat4 *mat4rotate(struct mat4 *res, double angle,  dimension_t dimension);
-
 struct mat4 *mat4move(struct mat4 *res, double x, double y, double z);
-
 struct mat4 *mat4scale(struct mat4 *res, double x, double y, double z);
-	
-struct mat4 *mat4persp(struct mat4 *res, double n, double f, double l, double r, double b, double t);
+struct mat4 *mat4transpose(struct mat4 *res, const struct mat4 *src);
+struct mat4 *mat4persp(struct mat4 *res, double near, double far, double left, double right, double bot, double top);
 
 #endif

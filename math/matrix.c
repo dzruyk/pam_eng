@@ -52,6 +52,19 @@ mat2identity(struct mat2 *res)
 	return res;
 }
 
+struct mat2 *
+mat2transpose(struct mat2 *res, const struct mat2 *src)
+{
+	struct mat2 m;
+
+	m._11 = src->_11; m._12 = src->_21;
+	m._21 = src->_12; m._22 = src->_22;
+
+	memcpy(res, &m, sizeof(m));
+
+	return res;
+}
+
 struct mat3 *
 mat3init(struct mat3 *res, const double *arr)
 {
@@ -138,6 +151,20 @@ mat3scale(struct mat3 *res, double x, double y)
 	res->_11 = x; res->_12 = 0; res->_13 = 0;
 	res->_21 = 0; res->_22 = y; res->_23 = 0;
 	res->_31 = 0; res->_32 = 0; res->_33 = 1;
+
+	return res;
+}
+
+struct mat3 *
+mat3transpose(struct mat3 *res, const struct mat3 *src)
+{
+	struct mat3 m;
+
+	m._11 = src->_11; m._12 = src->_21; m._13 = src->_31;
+	m._21 = src->_12; m._22 = src->_22; m._23 = src->_32;
+	m._31 = src->_13; m._32 = src->_23; m._33 = src->_33;
+
+	memcpy(res, &m, sizeof(m));
 
 	return res;
 }
@@ -268,24 +295,37 @@ mat4scale(struct mat4 *res, double x, double y, double z)
 }
 
 struct mat4 *
-mat4persp(struct mat4 *res, double n, double f, double l, double r, double b, double t)
+mat4transpose(struct mat4 *res, const struct mat4 *src)
 {
-	res->_11 = 2 * n / (r - l);
-	res->_12 = 0;
-	res->_13 = (r + l) / (r - l);
-	res->_14 = 0;
-	res->_21 = 0;
-	res->_22 = 2 * n / (t -  b);
-	res->_23 = (t + b) / (t - b);
-	res->_24 = 0;
-	res->_31 = 0;
-	res->_32 = 0;
-	res->_33 = (-f-n) / (f - n);
-	res->_34 = -2 * n * f / (f - n);
-	res->_41 = 0;
-	res->_42 = 0;
-	res->_43 = -1;
-	res->_44 = 0;
+	struct mat4 m;
+
+	m._11 = src->_11; m._12 = src->_21; m._13 = src->_31; m._14 = src->_41;
+	m._21 = src->_12; m._22 = src->_22; m._23 = src->_32; m._24 = src->_42;
+	m._31 = src->_13; m._32 = src->_23; m._33 = src->_33; m._34 = src->_43;
+	m._41 = src->_14; m._42 = src->_24; m._43 = src->_34; m._44 = src->_44;
+
+	memcpy(res, &m, sizeof(m));
+
+	return res;
+}
+
+struct mat4 *
+mat4persp(struct mat4 *res, double near, double far, double left, double right, double bot, double top)
+{
+	double x, y;
+	double a, b, c, d;
+
+	x = 2 * near / (right - left);
+	y = 2 * near / (top -  bot);
+	a = (right + left) / (right - left);
+	b= (top + bot) / (top - bot);
+	c = (-far-near) / (far - near);
+	d = -2 * near * far / (far - near);
+
+	res->_11 = x; res->_12 = 0; res->_13 = a; res->_14 = 0;
+	res->_21 = 0; res->_22 = y; res->_23 = b; res->_24 = 0;
+	res->_31 = 0; res->_32 = 0; res->_33 = c; res->_34 = d;
+	res->_41 = 0; res->_42 = 0; res->_43 = -1; res->_44 = 0;
 
 	return res;
 }
