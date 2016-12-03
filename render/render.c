@@ -146,7 +146,12 @@ wiredrender(const struct pe_context *c)
 		pa->w = 1.0;
 
 		mat4vec(&tmp, &c->worldmat, pa);
-		pa = mat4vec(&tmp, &c->perspmat, pa);
+		pa = mat4vec(&tmp, &c->perspmat, &tmp);
+
+		pa->x /= pa->w;
+		pa->y /= pa->w;
+		pa->z /= pa->w;
+		pa->w = 1;
 
 		x = (pa->x + 1.0) * c->target->w * 0.5;
 		y = (pa->y + 1.0) * c->target->h * 0.5;
