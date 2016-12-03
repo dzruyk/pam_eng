@@ -13,8 +13,8 @@
 #include "camera.h"
 #include "gui.h"
 
-#define SURWIDTH 720
-#define SURHEIGHT 480
+#define SURWIDTH 1080
+#define SURHEIGHT 1080
 
 char *usg = "usage: %s [OPTS] input.obj\n";
 

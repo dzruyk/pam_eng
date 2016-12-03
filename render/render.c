@@ -127,6 +127,9 @@ wiredrender(const struct pe_context *c)
 {
 	int i, j;
 	int objsz;
+	struct mat4 res;
+
+	pe_setperspmatrix((struct pe_context *)c, mat4persp(&res, 1, 100, -1, 1, -1, 1));
 
 	objsz = c->target->w;
 
@@ -142,7 +145,13 @@ wiredrender(const struct pe_context *c)
 		pa = dbuf_get(c->vertex, pidx[0] - 1);
 		pa->w = 1.0;
 
-		pa = mat4vec(&tmp, &c->worldmat, pa);
+		mat4vec(&tmp, &c->worldmat, pa);
+		pa = mat4vec(&tmp, &c->perspmat, &tmp);
+
+		pa->x /= pa->w;
+		pa->y /= pa->w;
+		pa->z /= pa->w;
+		pa->w = 1;
 
 		x = (pa->x + 1.0) * c->target->w * 0.5;
 		y = (pa->y + 1.0) * c->target->h * 0.5;
@@ -151,13 +160,19 @@ wiredrender(const struct pe_context *c)
 
 		for (j = 0; j < 3; j++) {
 			int idx;
-
 			// Traverse each vertex of triangle
 			idx = pidx[(j + 1) % 3];
 
 			pa = dbuf_get(c->vertex, idx - 1);
 			pa->w = 1.0;
-			pa = mat4vec(&tmp, &c->worldmat, pa);
+
+			mat4vec(&tmp, &c->worldmat, pa);
+			pa = mat4vec(&tmp, &c->perspmat, &tmp);
+
+			pa->x /= pa->w;
+			pa->y /= pa->w;
+			pa->z /= pa->w;
+			pa->w = 1;
 
 			x = (pa->x + 1.0) * c->target->w * 0.5;
 			y = (pa->y + 1.0) * c->target->h * 0.5;
