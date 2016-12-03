@@ -267,6 +267,32 @@ mat4scale(struct mat4 *res, double x, double y, double z)
 	return res;
 }
 
+<<<<<<< HEAD
+struct mat4 *
+mat4persp(struct mat4 *res, double n, double f, double l, double r, double b, double t)
+{
+	res->_11 = 2 * n / (r - l);
+	res->_12 = 0;
+	res->_13 = (r + l) / (r - l);
+	res->_14 = 0;
+	res->_21 = 0;
+	res->_22 = 2 * n / (t -  b);
+	res->_23 = (t + b) / (t - b);
+	res->_24 = 0;
+	res->_31 = 0;
+	res->_32 = 0;
+	res->_33 = (-f-n) / (f - n);
+	res->_34 = -2 * n * f / (f - n);
+	res->_41 = 0;
+	res->_42 = 0;
+	res->_43 = -1;
+	res->_44 = 0;
+
+	return res;
+}
+
+
+=======
 
 struct mat4 *
 mat4persp(struct mat4 *res, double n_pl, double f_pl, double fov_x, double fov_y)
@@ -283,3 +309,4 @@ mat4persp(struct mat4 *res, double n_pl, double f_pl, double fov_x, double fov_y
 
 	return res;
 }
+>>>>>>> 0870e9f780b1a94dfd35a5f66b8db356d77c9b93

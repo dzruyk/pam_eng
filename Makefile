@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -I./include -ggdb
+CFLAGS=-Wall -I./include -ggdb -fno-stack-protector
 BIN=runit
 LDFLAGS=-lcairo -lm -lxcb -lxcb-keysyms
 OBJS=main.o core/dbuf.o render/render.o math/matrix.o utils/objloader.o \

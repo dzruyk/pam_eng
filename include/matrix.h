@@ -119,7 +119,7 @@ struct mat4 *mat4rotate(struct mat4 *res, double angle,  dimension_t dimension);
 struct mat4 *mat4move(struct mat4 *res, double x, double y, double z);
 
 struct mat4 *mat4scale(struct mat4 *res, double x, double y, double z);
-
-struct mat4 *mat4persp(struct mat4 *res, double n_pl, double f_pl, double fov_x, double fov_y);
+	
+struct mat4 *mat4persp(struct mat4 *res, double n, double f, double l, double r, double b, double t);
 
 #endif

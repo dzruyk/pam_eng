@@ -16,19 +16,19 @@ static xcb_visualtype_t *
 find_visual(xcb_connection_t *c, xcb_visualid_t v)
 {
 	xcb_screen_iterator_t si;
-	
+
 	si = xcb_setup_roots_iterator(xcb_get_setup(c));
 
 	for (; si.rem; xcb_screen_next(&si)) {
 		xcb_depth_iterator_t di;
-		
+
 		di = xcb_screen_allowed_depths_iterator(si.data);
-		
+
 		for (; di.rem; xcb_depth_next(&di)) {
 			xcb_visualtype_iterator_t vi;
-			
+
 			vi = xcb_depth_visuals_iterator(di.data);
-			
+
 			for (; vi.rem; xcb_visualtype_next(&vi))
 				if (v == vi.data->visual_id)
 					return vi.data;
@@ -45,11 +45,11 @@ blocksigalrm(sigset_t *oldmask)
 
 	sigemptyset(&newmask);
 	sigaddset(&newmask, SIGALRM);
-	
+
 	if (sigprocmask(SIG_BLOCK, &newmask, oldmask) < 0)
 		return (-1);
 
-	return 0;	
+	return 0;
 }
 
 static int
@@ -126,7 +126,7 @@ windowforceredraw(xcb_connection_t *c, xcb_window_t *win)
 	xcb_send_event(c, 0, *win, XCB_EVENT_MASK_EXPOSURE, (char *)ee);
 
 	xcb_flush(c);
-	
+
 	free(ee);
 
 	return 0;
@@ -142,10 +142,10 @@ mainloop(struct xdata *guidata, void *userdata)
 		xcb_keysym_t keysym;
 
 		event = xcb_poll_for_event(guidata->connection);
-		
+
 		if (event == NULL) {
 			guidata->defaultcallback(userdata);
-	
+
 			windowforceredraw(guidata->connection,
 				&(guidata->win));
 
@@ -153,31 +153,31 @@ mainloop(struct xdata *guidata, void *userdata)
 		}
 
 		blocksigalrm(&oldmask);
-		
+
 		switch (event->response_type & ~0x80) {
 		case XCB_EXPOSE:
 			guidata->drawcallback(guidata->sur, userdata);
-			
+
 			cairo_set_source_surface(guidata->cr,
 				guidata->sur, 0, 0);
 			cairo_paint(guidata->cr);
-			
+
 			cairo_surface_flush(guidata->sur);
-		
+
 			break;
-	
+
 		case XCB_KEY_PRESS:
 			ks = xcb_key_symbols_alloc(guidata->connection);
 
 			keysym = xcb_key_symbols_get_keysym(ks,
-				((xcb_key_press_event_t *) event)->detail, 1);
-			
+				((xcb_key_press_event_t *) event)->detail, 0);
+
 			guidata->keypresscallback(keysym, userdata);
 
 			xcb_key_symbols_free(ks);
-	
+
 			break;
-		
+
 		case XCB_MOTION_NOTIFY:
 			guidata->motioncallback(
 				((xcb_motion_notify_event_t *) event)->event_x,
@@ -185,27 +185,29 @@ mainloop(struct xdata *guidata, void *userdata)
 				userdata);
 
 			break;
-	
+
 		case XCB_BUTTON_PRESS:
 			guidata->buttonpresscallback(
 				((xcb_button_press_event_t *)event)->detail,
 				userdata);
+
 			break;
 
-	
+
 		case XCB_BUTTON_RELEASE:
 				guidata->buttonreleasecallback(
 				((xcb_button_press_event_t *)event)->detail,
 				userdata);
+
 			break;
-		
+
 		default:
 			break;
 		}
-			
+
 		unblocksigalrm(&oldmask);
 
-		free(event);	
+		free(event);
 		xcb_flush(guidata->connection);
 	}
 
@@ -218,7 +220,7 @@ settimer(void (*timerfunc)(int), void *userdata, double secs)
 	struct itimerval tv;
 
 	timerud = userdata;
-	
+
 	if (signal(SIGALRM, timerfunc) == SIG_ERR)
 		return 1;
 
