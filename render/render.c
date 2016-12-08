@@ -122,11 +122,31 @@ pe_settexture(struct pe_context *c, const struct pe_surface *sur)
 	return 0;
 }
 
+static void
+draw_triangle(const struct pe_context *ctx, struct vec4 t[3])
+{
+	int i;
+	struct vec3 a, b, c;
+	struct vec3 viewdir = {0, 0, -1};
+	double r;
+
+	for (i = 0; i < 3; i++) {
+		int x, y;
+
+		x = (t[i].x + 1.0) * ctx->target->w * 0.5;
+		y = (t[i].y + 1.0) * ctx->target->h * 0.5;
+
+		if (i == 0)
+			pe_setpos(x, y);
+		else
+			pe_lineto(ctx->target, x, y, &(ctx->mat->color));
+	}
+}
+
 static int
 wiredrender(const struct pe_context *c)
 {
 	int i, j;
-	int objsz;
 	struct mat4 res, prj;
 
 	pe_setperspmatrix((struct pe_context *)c, mat4persp(&prj, 1, 100, -1, 1, -1, 1));
@@ -135,52 +155,24 @@ wiredrender(const struct pe_context *c)
 	mat4mult(&res, &res, &prj);
 	mat4transpose(&res, &res);
 
-	objsz = c->target->w;
-
-	if (c->target->h < objsz)
-		objsz = c->target->h;
-
 	for (i = 0; i < c->index->length; i += 3) {
 		int *pidx;
-		struct vec4 *pa, tmp;
-		int x, y;
+		struct vec4 *pa, triangle[3];
 
 		pidx = dbuf_get(c->index, i);
-		pa = dbuf_get(c->vertex, pidx[0] - 1);
-		pa->w = 1.0;
-
-		pa = mat4vec(&tmp, &res, pa);
-
-		pa->x /= pa->w;
-		pa->y /= pa->w;
-		pa->z /= pa->w;
-		pa->w = 1;
-
-		x = (pa->x + 1.0) * c->target->w * 0.5;
-		y = (pa->y + 1.0) * c->target->h * 0.5;
-
-		pe_setpos(x, y);
-
 		for (j = 0; j < 3; j++) {
-			int idx;
-			// Traverse each vertex of triangle
-			idx = pidx[(j + 1) % 3];
+			pa = dbuf_get(c->vertex, pidx[j]);
+			pa->w = 1;
 
-			pa = dbuf_get(c->vertex, idx - 1);
-			pa->w = 1.0;
-
-			pa = mat4vec(&tmp, &res, pa);
+			pa = mat4vec(&triangle[j], &res, pa);
 
 			pa->x /= pa->w;
 			pa->y /= pa->w;
 			pa->z /= pa->w;
 			pa->w = 1;
-
-			x = (pa->x + 1.0) * c->target->w * 0.5;
-			y = (pa->y + 1.0) * c->target->h * 0.5;
-
-			pe_lineto(c->target, x, y, &(c->mat->color));
 		}
+
+		draw_triangle(c, triangle);
 	}
 
 	return 0;

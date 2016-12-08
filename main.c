@@ -103,7 +103,7 @@ keypress(xcb_keysym_t keysym, void *userdata)
 
 	rd = userdata;
 
-	movedelta = 0.01;
+	movedelta = 0.10;
 
 	printf("Keysym: %x\n", keysym);
 
@@ -199,7 +199,7 @@ main(int argc, char **argv)
 	pe_objload(&(rd.m), argv[1]);
 
 	pe_meshnormalize(&(rd.m));
-	
+
 	if (pe_createsur(&(rd.sur), SURWIDTH, SURHEIGHT, SF_RGB24) < 0)
 		return 1;
 
@@ -210,7 +210,7 @@ main(int argc, char **argv)
 
 	pe_initcontext(&(rd.context));
 	pe_settarget(&(rd.context), &(rd.sur));
-
+	pe_cammove(&rd.context.worldmat, 0, 0, -2.);
 
 	guidata.defaultcallback = render;
 	guidata.drawcallback = draw;

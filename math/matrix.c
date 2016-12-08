@@ -7,6 +7,61 @@
 #include "macros.h"
 #include "matrix.h"
 
+struct vec3 *
+vec3add(struct vec3 *res, const struct vec3 *a, const struct vec3 *b)
+{
+	res->x = a->x + b->x;
+	res->y = a->y + b->y;
+	res->z = a->z + b->z;
+
+	return res;
+}
+
+struct vec3 *
+vec3sub(struct vec3 *res, const struct vec3 *a, const struct vec3 *b)
+{
+	res->x = a->x - b->x;
+	res->y = a->y - b->y;
+	res->z = a->z - b->z;
+
+	return res;
+}
+
+double
+vec3dot(const struct vec3 *a, const struct vec3 *b)
+{
+	return a->x * b->x + a->y * b->y + a->z * b->z;
+}
+
+struct vec3 *
+vec3cross(struct vec3 *res, const struct vec3 *a, const struct vec3 *b)
+{
+	struct vec3 v;
+
+	v.x = a->y * b->z - a->z * b->y;
+	v.y = a->z * b->x - a->x * b->z;
+	v.z = a->x * b->y - a->y * b->x;
+
+	*res = v;
+
+	return res;
+}
+
+struct vec3 *
+vec3norm(struct vec3 *res, const struct vec3 *src)
+{
+	double l;
+
+	l = sqrt(src->x * src->x + src->y * src->y + src->z * src->z);
+
+	res->x /= l;
+	res->y /= l;
+	res->z /= l;
+
+	return res;
+}
+
+
 struct mat2 *
 mat2init(struct mat2 *res, const double *arr)
 {

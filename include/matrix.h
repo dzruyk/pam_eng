@@ -109,4 +109,9 @@ struct mat4 *mat4scale(struct mat4 *res, double x, double y, double z);
 struct mat4 *mat4transpose(struct mat4 *res, const struct mat4 *src);
 struct mat4 *mat4persp(struct mat4 *res, double near, double far, double left, double right, double bot, double top);
 
+struct vec3 *vec3add(struct vec3 *res, const struct vec3 *a, const struct vec3 *b);
+struct vec3 *vec3sub(struct vec3 *res, const struct vec3 *a, const struct vec3 *b);
+double vec3dot(const struct vec3 *a, const struct vec3 *b);
+struct vec3 *vec3cross(struct vec3 *res, const struct vec3 *a, const struct vec3 *b);
+struct vec3 *vec3norm(struct vec3 *res, const struct vec3 *src);
 #endif

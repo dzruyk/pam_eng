@@ -81,16 +81,18 @@ dbuf_push(struct dbuf *db, void *value)
 
 	if (db->length == db->capacity) {
 		unsigned char *tmp;
+		unsigned int ncap;
 
 		if (db->flag)
 			return 1; /* can't reallocate given array */
 
-		db->capacity *= DBUF_CAPACITY_GROWTH;
-		tmp = realloc(db->data, db->size * db->capacity);
+		ncap = db->capacity * DBUF_CAPACITY_GROWTH;
 
-		if (!tmp)
-			return 1; /* realloc returned no memory signal */
+		tmp = realloc(db->data, db->size * ncap);
+		if (tmp == NULL)
+			return 1; /* nomem */
 
+		db->capacity = ncap;
 		db->data = tmp;
 	}
 

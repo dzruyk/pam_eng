@@ -113,6 +113,7 @@ int pe_lineto(struct pe_surface *sur, int x1, int y1,
 
 	while (linex0 != x1 || liney0 != y1) {
 		int error2;
+		if (linex0 < 0 || liney0 < 0) break;
 
 		if (linex0 >= 0 && linex0 < sur->w
 			&& liney0 >= 0 && liney0 < sur->h) {
