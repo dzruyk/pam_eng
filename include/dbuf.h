@@ -26,6 +26,8 @@ int dbuf_len(const struct dbuf *Dbuf);
 
 void *dbuf_getarr(const struct dbuf *Dbuf);
 
+int dbuf_ensure(struct dbuf *db, unsigned int size);
+
 void *dbuf_get(const struct dbuf *Dbuf, int index);
 
 void dbuf_set(struct dbuf *Dbuf, int index, void *value);

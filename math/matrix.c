@@ -54,13 +54,12 @@ vec3norm(struct vec3 *res, const struct vec3 *src)
 
 	l = sqrt(src->x * src->x + src->y * src->y + src->z * src->z);
 
-	res->x /= l;
-	res->y /= l;
-	res->z /= l;
+	res->x = src->x / l;
+	res->y = src->y / l;
+	res->z = src->z / l;
 
 	return res;
 }
-
 
 struct mat2 *
 mat2init(struct mat2 *res, const double *arr)

@@ -10,6 +10,7 @@
 #include "mesh.h"
 #include "matrix.h"
 #include "render.h"
+#include "timer.h"
 #include "camera.h"
 #include "gui.h"
 
@@ -48,6 +49,9 @@ int
 render(void *userdata)
 {
 	struct renderdata *rd;
+	int start, stop;
+
+	start = pe_getticks();
 
 	rd = userdata;
 
@@ -60,6 +64,9 @@ render(void *userdata)
 	pe_setmaterial(&(rd->context), &(rd->mat));
 
 	pe_render(&(rd->context));
+	stop = pe_getticks();
+
+	printf("render time %d\n", stop - start);
 
 	return 0;
 }
@@ -198,7 +205,7 @@ main(int argc, char **argv)
 
 	pe_objload(&(rd.m), argv[1]);
 
-	pe_meshnormalize(&(rd.m));
+	//pe_meshnormalize(&(rd.m));
 
 	if (pe_createsur(&(rd.sur), SURWIDTH, SURHEIGHT, SF_RGB24) < 0)
 		return 1;

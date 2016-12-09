@@ -46,6 +46,26 @@ dbuf_len(const struct dbuf *db)
 	return db->length;
 }
 
+int
+dbuf_ensure(struct dbuf *db, unsigned int size)
+{
+	unsigned char *tmp;
+
+	if (db->capacity < size) {
+		tmp = realloc(db->data, size * db->size);
+		if (tmp == NULL)
+			return 1; /* nomem */
+
+		db->capacity = size;
+		db->data = tmp;
+	}
+
+	if (db->length < size)
+		db->length = size;
+
+	return 0;
+}
+
 void *
 dbuf_getarr(const struct dbuf *db)
 {

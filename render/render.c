@@ -122,13 +122,27 @@ pe_settexture(struct pe_context *c, const struct pe_surface *sur)
 	return 0;
 }
 
-static void
+static inline void
 draw_triangle(const struct pe_context *ctx, struct vec4 t[3])
 {
 	int i;
 	struct vec3 a, b, c;
-	struct vec3 viewdir = {0, 0, -1};
+	struct vec3 viewdir = {.arr = {0, 0, -1}};
 	double r;
+
+	for (i = 0; i < 3; i++) {
+		if (t[i].z < -1. || t[i].z > 1.)
+			return;
+	}
+
+	// Backface culling
+	vec3sub(&a, (struct vec3 *)&t[1], (struct vec3 *)&t[0]);
+	vec3sub(&b, (struct vec3 *)&t[2], (struct vec3 *)&t[0]);
+	vec3cross(&c, &a, &b);
+
+	r = vec3dot(&c, &viewdir);
+	if (r > 0)
+		return;
 
 	for (i = 0; i < 3; i++) {
 		int x, y;

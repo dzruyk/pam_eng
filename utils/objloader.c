@@ -104,7 +104,7 @@ parse_face(const char *line, struct vec3int *v)
 	char *d = " \t";
 
 	p = line;
-	printf("%s\n", line);
+	//printf("%s\n", line);
 	for (i = 0; i < 3; i++) {
 		n = strspn(p, d);
 		if (n == 0 && i != 2) {
