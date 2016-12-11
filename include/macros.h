@@ -81,4 +81,7 @@ do { \
 
 #define ARRSZ(arr) (sizeof(arr) / sizeof(arr[0]))
 
+#define MIN(a, b) (a < b ? a : b)
+#define MAX(a, b) (a > b ? a : b)
+
 #endif

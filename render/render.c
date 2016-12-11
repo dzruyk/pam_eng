@@ -144,11 +144,11 @@ draw_triangle(const struct pe_context *ctx, struct vec4 t[3])
 	if (r > 0)
 		return;
 
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i <= 3; i++) {
 		int x, y;
 
-		x = (t[i].x + 1.0) * ctx->target->w * 0.5;
-		y = (t[i].y + 1.0) * ctx->target->h * 0.5;
+		x = (t[i % 3].x + 1.0) * ctx->target->w * 0.5;
+		y = (t[i % 3].y + 1.0) * ctx->target->h * 0.5;
 
 		if (i == 0)
 			pe_setpos(x, y);

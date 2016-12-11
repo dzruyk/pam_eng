@@ -112,19 +112,19 @@ pe_setpoint(struct pe_surface *sur, int x0, int y0, const struct pe_color *c)
 			= c->g * 255.0;
 		sur->data[(y0 * sur->w + x0) * 3 + 2]
 			= c->b * 255.0;
+
+		return 0;
 	}
+
+	return 1;
 }
 
-#define SWAP(a, b) do {				\
-	int tmp;				\
+#define swap(a, b) do {				\
+	__typeof__(a) tmp;			\
 	tmp = a;				\
 	a = b;					\
 	b = tmp;				\
 } while (0)
-
-
-#define MIN(a, b) (a < b ? a : b)
-#define MAX(a, b) (a > b ? a : b)
 
 int
 pe_lineto(struct pe_surface *sur, int x1, int y1,
@@ -132,10 +132,9 @@ pe_lineto(struct pe_surface *sur, int x1, int y1,
 {
 	int deltax, deltay;
 	int error;
-	int signx, signy;
+	int signy;
 	int x0, y0;
-	int h, w;
-	int transposed = 0;
+	//int h, w;
 
 	x0 = linex0;
 	y0 = liney0;
@@ -150,8 +149,8 @@ pe_lineto(struct pe_surface *sur, int x1, int y1,
 		return 0;
 
 	if (x0 > x1) {
-		SWAP(x0, x1);
-		SWAP(y0, y1);
+		swap(x0, x1);
+		swap(y0, y1);
 	}
 
 	deltax = abs(x1 - x0);
@@ -159,16 +158,17 @@ pe_lineto(struct pe_surface *sur, int x1, int y1,
 	signy = y0 < y1 ? 1 : -1;
 	error = deltax - deltay;
 
-	h = sur->h;
-	w = sur->w;
-
+	//h = sur->h;
+	//w = sur->w;
 	while (x0 != x1 || y0 != y1) {
 		int error2;
 
+		/*
 		// FIXME: оптимизация не работает корректно для линий,
 		// которые начинаются за границей экрана
 		if (x0 > w || y0 < 0 || y0 > h)
 			break;
+		*/
 
 		pe_setpoint(sur, x0, y0, c);
 
