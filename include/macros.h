@@ -50,8 +50,17 @@ do { \
 	} \
 } while (0)
 
+
+#define swap(a, b) do {				\
+	__typeof__(a) tmp;			\
+	tmp = a;				\
+	a = b;					\
+	b = tmp;				\
+} while (0)
+
+
 #define FREE(addr)	\
-do { \
+do {                    \
 	free(addr);	\
 	addr = NULL;	\
 } while (0)

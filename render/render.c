@@ -1,4 +1,6 @@
+#include "macros.h"
 #include "render.h"
+#include "surface.h"
 
 struct pe_material pe_defmat = { {1.0, 1.0, 1.0, 1.0} };
 
@@ -122,6 +124,32 @@ pe_settexture(struct pe_context *c, const struct pe_surface *sur)
 	return 0;
 }
 
+void
+fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
+{
+	int x1 = (t[0].x + 1.0) * ctx->target->w * 0.5;
+	int x2 = (t[1].x + 1.0) * ctx->target->h * 0.5;
+	int x3 = (t[2].x + 1.0) * ctx->target->w * 0.5;
+	int y1 = (t[0].y + 1.0) * ctx->target->w * 0.5;
+	int y2 = (t[1].y + 1.0) * ctx->target->w * 0.5;
+	int y3 = (t[2].y + 1.0) * ctx->target->w * 0.5;
+
+	int x0, y0;
+
+	for (x0 = MIN(x1, MIN(x2, x3)); x0 <= MAX(x1, MAX(x2, x3)); x0++) {
+		for (y0 = y1; y0 <= y3; y0++) {
+			if ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0) <= 0 &&
+				(x2 - x0) * (y3 - y2) - (x3 - x2) * (y2 - y0) <= 0 &&
+				(x3 - x0) * (y1 - y3) - (x1 - x3) * (y3 - y0) <= 0)
+				pe_setpoint(ctx->target, x0, y0, &(ctx->mat->color));
+			else if ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0) >= 0 &&
+				(x2 - x0) * (y3 - y2) - (x3 - x2) * (y2 - y0) >= 0 &&
+				(x3 - x0) * (y1 - y3) - (x1 - x3) * (y3 - y0) >= 0)
+				pe_setpoint(ctx->target, x0, y0, &(ctx->mat->color));
+		}
+	}
+}
+
 static inline void
 draw_triangle(const struct pe_context *ctx, struct vec4 t[3])
 {
@@ -141,8 +169,11 @@ draw_triangle(const struct pe_context *ctx, struct vec4 t[3])
 	vec3cross(&c, &a, &b);
 
 	r = vec3dot(&c, &viewdir);
+
 	if (r > 0)
 		return;
+
+	fill_triangle(ctx, t);
 
 	for (i = 0; i <= 3; i++) {
 		int x, y;

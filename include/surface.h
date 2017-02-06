@@ -30,6 +30,8 @@ int pe_fillsur(struct pe_surface *sur, int r, int g, int b);
 
 int pe_setpos(int x, int y);
 
+int pe_setpoint(struct pe_surface *sur, int x0, int y0, const struct pe_color *c);
+
 int pe_lineto(struct pe_surface *sur, int x1, int y1,
 	const struct pe_color *c);
 

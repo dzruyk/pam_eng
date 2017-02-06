@@ -92,9 +92,6 @@ pe_fillsur(struct pe_surface *sur, int r, int g, int b)
 int
 pe_setpos(int x, int y)
 {
-	if (x <= 0 || y <= 0)
-		return (-1);
-
 	linex0 = x;
 	liney0 = y;
 
@@ -118,13 +115,6 @@ pe_setpoint(struct pe_surface *sur, int x0, int y0, const struct pe_color *c)
 
 	return 1;
 }
-
-#define swap(a, b) do {				\
-	__typeof__(a) tmp;			\
-	tmp = a;				\
-	a = b;					\
-	b = tmp;				\
-} while (0)
 
 int
 pe_lineto(struct pe_surface *sur, int x1, int y1,
