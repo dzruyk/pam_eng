@@ -17,37 +17,37 @@
 
 #define STREQ(s1, s2)	(strcmp(s1, s2) == 0)
 
-#define SHOULDNT_REACH() \
-do { \
+#define SHOULDNT_REACH()                                                    \
+do {                                                                        \
 	fprintf(stderr, "file %s line %d %s(): should not reach this" CRLF, \
-		__FILE__, \
-		__LINE__, \
-		__FUNCTION__); \
-	abort(); \
+		__FILE__,                                                   \
+		__LINE__,                                                   \
+		__FUNCTION__);                                              \
+	abort();                                                            \
 } while (0)
 
-#define return_if_fail(expr) \
-do { \
-	if (!(expr)) { \
+#define return_if_fail(expr)                                                         \
+do {                                                                                 \
+	if (!(expr)) {                                                               \
 		fprintf(stderr, "file %s line %d %s(): expression `%s' failed" CRLF, \
-			__FILE__, \
-			__LINE__, \
-			__FUNCTION__, \
-			#expr); \
-		return; \
-	} \
+			__FILE__,                                                    \
+			__LINE__,                                                    \
+			__FUNCTION__,                                                \
+			#expr);                                                      \
+		return;                                                              \
+	}                                                                            \
 } while (0)
 
-#define return_val_if_fail(expr, val) \
-do { \
-	if (!(expr)) { \
+#define return_val_if_fail(expr, val)                                                \
+do {                                                                                 \
+	if (!(expr)) {                                                               \
 		fprintf(stderr, "file %s line %d %s(): expression `%s' failed" CRLF, \
-			__FILE__, \
-			__LINE__, \
-			__FUNCTION__, \
-			#expr); \
-		return (val); \
-	} \
+			__FILE__,                                                    \
+			__LINE__,                                                    \
+			__FUNCTION__,                                                \
+			#expr);                                                      \
+		return (val);                                                        \
+	}                                                                            \
 } while (0)
 
 
@@ -66,26 +66,26 @@ do {                    \
 } while (0)
 
 
-#define error(status, fmt, arg...) \
-do { \
+#define error(status, fmt, arg...)                   \
+do {                                                 \
 	fprintf(stderr, "error: %s:%d %s: "fmt CRLF, \
-			__FILE__, \
-			__LINE__, \
-			__FUNCTION__, \
-			##arg); \
-	fflush(stderr); \
-	exit(status);	\
+			__FILE__,                    \
+			__LINE__,                    \
+			__FUNCTION__,                \
+			##arg);                      \
+	fflush(stderr);                              \
+	exit(status);	                             \
 } while (0)
 
 
-#define warning(fmt, arg...) \
-do { \
+#define warning(fmt, arg...)                           \
+do {                                                   \
 	fprintf(stderr, "warning: %s:%d %s: "fmt CRLF, \
-			__FILE__, \
-			__LINE__, \
-			__FUNCTION__, \
-			##arg); \
-	fflush(stderr); \
+			__FILE__,                      \
+			__LINE__,                      \
+			__FUNCTION__,                  \
+			##arg);                        \
+	fflush(stderr);                                \
 } while (0)
 
 #define ARRSZ(arr) (sizeof(arr) / sizeof(arr[0]))

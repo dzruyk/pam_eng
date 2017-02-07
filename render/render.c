@@ -127,6 +127,10 @@ pe_settexture(struct pe_context *c, const struct pe_surface *sur)
 void
 fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
 {
+	if (t[0].y > t[1].y) swap(t[0], t[1]);
+	if (t[1].y > t[2].y) swap(t[1], t[2]);
+	if (t[0].y > t[1].y) swap(t[0], t[1]);
+
 	int x1 = (t[0].x + 1.0) * ctx->target->w * 0.5;
 	int x2 = (t[1].x + 1.0) * ctx->target->h * 0.5;
 	int x3 = (t[2].x + 1.0) * ctx->target->w * 0.5;
@@ -136,15 +140,32 @@ fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
 
 	int x0, y0;
 
-	for (x0 = MIN(x1, MIN(x2, x3)); x0 <= MAX(x1, MAX(x2, x3)); x0++) {
+	int minx, maxx;
+
+	if (x1 > x2) {
+		minx = x2;
+		maxx = x1;
+	}
+	else {
+		minx = x1;
+		maxx = x2;
+	}
+
+	if (minx > x3)
+		minx = x3;
+
+	if (maxx < x3)
+		maxx = x3;
+
+	for (x0 = minx; x0 <= maxx; x0++) {
 		for (y0 = y1; y0 <= y3; y0++) {
-			if ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0) <= 0 &&
-				(x2 - x0) * (y3 - y2) - (x3 - x2) * (y2 - y0) <= 0 &&
-				(x3 - x0) * (y1 - y3) - (x1 - x3) * (y3 - y0) <= 0)
+			if ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0) < 0 &&
+				(x2 - x0) * (y3 - y2) - (x3 - x2) * (y2 - y0) < 0 &&
+				(x3 - x0) * (y1 - y3) - (x1 - x3) * (y3 - y0) < 0)
 				pe_setpoint(ctx->target, x0, y0, &(ctx->mat->color));
-			else if ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0) >= 0 &&
-				(x2 - x0) * (y3 - y2) - (x3 - x2) * (y2 - y0) >= 0 &&
-				(x3 - x0) * (y1 - y3) - (x1 - x3) * (y3 - y0) >= 0)
+			else if ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0) > 0 &&
+				(x2 - x0) * (y3 - y2) - (x3 - x2) * (y2 - y0) > 0 &&
+				(x3 - x0) * (y1 - y3) - (x1 - x3) * (y3 - y0) > 0)
 				pe_setpoint(ctx->target, x0, y0, &(ctx->mat->color));
 		}
 	}
