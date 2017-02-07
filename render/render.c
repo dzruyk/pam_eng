@@ -125,47 +125,55 @@ pe_settexture(struct pe_context *c, const struct pe_surface *sur)
 }
 
 void
+stroke_triangle(const struct pe_context *c, struct vec4 t[3])
+{
+	int i;
+	
+	for (i = 0; i <= 3; i++) {
+		int x, y;
+
+		x = (t[i % 3].x + 1.0) * c->target->w * 0.5;
+		y = (t[i % 3].y + 1.0) * c->target->h * 0.5;
+
+		if (i == 0)
+			pe_setpos(x, y);
+		else
+			pe_lineto(c->target, x, y, &(c->mat->color));
+	}
+}
+
+//TODO: add rotate function ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0))
+//      
+
+void
 fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
 {
-	if (t[0].y > t[1].y) swap(t[0], t[1]);
-	if (t[1].y > t[2].y) swap(t[1], t[2]);
-	if (t[0].y > t[1].y) swap(t[0], t[1]);
-
-	int x1 = (t[0].x + 1.0) * ctx->target->w * 0.5;
-	int x2 = (t[1].x + 1.0) * ctx->target->h * 0.5;
-	int x3 = (t[2].x + 1.0) * ctx->target->w * 0.5;
-	int y1 = (t[0].y + 1.0) * ctx->target->w * 0.5;
-	int y2 = (t[1].y + 1.0) * ctx->target->w * 0.5;
-	int y3 = (t[2].y + 1.0) * ctx->target->w * 0.5;
-
+	int x1, x2, x3, y1, y2, y3;
 	int x0, y0;
-
+	int miny, maxy;
 	int minx, maxx;
 
-	if (x1 > x2) {
-		minx = x2;
-		maxx = x1;
-	}
-	else {
-		minx = x1;
-		maxx = x2;
-	}
+	x1 = (t[0].x + 1.0) * ctx->target->w * 0.5;
+	x2 = (t[1].x + 1.0) * ctx->target->h * 0.5;
+	x3 = (t[2].x + 1.0) * ctx->target->w * 0.5;
+	y1 = (t[0].y + 1.0) * ctx->target->w * 0.5;
+	y2 = (t[1].y + 1.0) * ctx->target->w * 0.5;
+	y3 = (t[2].y + 1.0) * ctx->target->w * 0.5;
 
-	if (minx > x3)
-		minx = x3;
-
-	if (maxx < x3)
-		maxx = x3;
+	miny = MIN(y1, MIN(y2, y3));
+	maxy = MAX(y1, MAX(y2, y3));
+	minx = MIN(x1, MIN(x2, x3));
+	maxx = MAX(x1, MAX(x2, x3));
 
 	for (x0 = minx; x0 <= maxx; x0++) {
-		for (y0 = y1; y0 <= y3; y0++) {
-			if ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0) < 0 &&
-				(x2 - x0) * (y3 - y2) - (x3 - x2) * (y2 - y0) < 0 &&
-				(x3 - x0) * (y1 - y3) - (x1 - x3) * (y3 - y0) < 0)
+		for (y0 = miny; y0 <= maxy; y0++) {
+			if ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0) <= 0 &&
+				(x2 - x0) * (y3 - y2) - (x3 - x2) * (y2 - y0) <= 0 &&
+				(x3 - x0) * (y1 - y3) - (x1 - x3) * (y3 - y0) <= 0)
 				pe_setpoint(ctx->target, x0, y0, &(ctx->mat->color));
-			else if ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0) > 0 &&
-				(x2 - x0) * (y3 - y2) - (x3 - x2) * (y2 - y0) > 0 &&
-				(x3 - x0) * (y1 - y3) - (x1 - x3) * (y3 - y0) > 0)
+			else if ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0) >= 0 &&
+				(x2 - x0) * (y3 - y2) - (x3 - x2) * (y2 - y0) >= 0 &&
+				(x3 - x0) * (y1 - y3) - (x1 - x3) * (y3 - y0) >= 0)
 				pe_setpoint(ctx->target, x0, y0, &(ctx->mat->color));
 		}
 	}
@@ -195,27 +203,17 @@ draw_triangle(const struct pe_context *ctx, struct vec4 t[3])
 		return;
 
 	fill_triangle(ctx, t);
-
-	for (i = 0; i <= 3; i++) {
-		int x, y;
-
-		x = (t[i % 3].x + 1.0) * ctx->target->w * 0.5;
-		y = (t[i % 3].y + 1.0) * ctx->target->h * 0.5;
-
-		if (i == 0)
-			pe_setpos(x, y);
-		else
-			pe_lineto(ctx->target, x, y, &(ctx->mat->color));
-	}
+//	stroke_triangle(ctx, t);
 }
 
-static int
-wiredrender(const struct pe_context *c)
+int
+pe_render(struct pe_context *c)
 {
 	int i, j;
 	struct mat4 res, prj;
 
-	pe_setperspmatrix((struct pe_context *)c, mat4persp(&prj, 1, 100, -1, 1, -1, 1));
+	pe_setperspmatrix((struct pe_context *)c,
+		mat4persp(&prj, 1, 100, -1, 1, -1, 1));
 	mat4transpose(&prj, &c->perspmat);
 	mat4transpose(&res, &c->worldmat);
 	mat4mult(&res, &res, &prj);
@@ -243,12 +241,3 @@ wiredrender(const struct pe_context *c)
 
 	return 0;
 }
-
-int
-pe_render(struct pe_context *c)
-{
-	wiredrender(c);
-
-	return 0;
-}
-
