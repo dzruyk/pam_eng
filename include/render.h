@@ -24,6 +24,7 @@ struct pe_context
 
 	struct mat4 worldmat;
 	struct mat4 perspmat;
+	struct mat4 viewportmat;
 
 	const struct pe_material *mat;
 	const struct pe_surface *texture;

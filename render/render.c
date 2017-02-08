@@ -20,6 +20,7 @@ pe_initcontext(struct pe_context *c)
 
 	mat4identity(&c->worldmat);
 	mat4identity(&c->perspmat);
+	mat4identity(&c->viewportmat);
 
 	c->mat = &pe_defmat;
 	c->texture = NULL;
@@ -33,10 +34,19 @@ pe_initcontext(struct pe_context *c)
 int
 pe_settarget(struct pe_context *c, struct pe_surface *sur)
 {
+	double s;
+	struct mat4 tmpm;
+
 	if (c == NULL || sur == NULL)
 		return (-1);
 
 	c->target = sur;
+
+	s = MIN(c->target->w, c->target->h) * 0.5;
+
+	mat4scale(&tmpm, s, s, 1.0);
+	mat4move(&(c->viewportmat), 1.0, 1.0, 0.0);
+	mat4mult(&(c->viewportmat), &tmpm, &(c->viewportmat));
 
 	return 0;
 }
@@ -142,6 +152,60 @@ stroke_triangle(const struct pe_context *c, struct vec4 t[3])
 	}
 }
 
+void
+fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
+{
+	int x1, x2, x3, y1, y2, y3;
+	double b1, b2, b3;
+	int x, y;
+
+	x1 = t[0].x;	y1 = t[0].y;
+	x2 = t[1].x;	y2 = t[1].y;
+	x3 = t[2].x;	y3 = t[2].y;
+
+	if (y1 > y2) {
+		swap(y1, y2);
+		swap(x1, x2);
+	}
+
+	if (y2 > y3) {
+		swap(y2, y3);
+		swap(x2, x3);
+	}
+
+	if (y1 > y2) {
+		swap(y1, y2);
+		swap(x1, x2);
+	}
+
+	b1 = (y2 - y1) ? ((double) (x2 - x1) / (y2 - y1)) : 0.0;
+	b2 = (y3 - y1) ? ((double) (x3 - x1) / (y3 - y1)) : 0.0;
+	b3 = (y3 - y2) ? ((double) (x3 - x2) / (y3 - y2)) : 0.0;
+
+	for (y = y1; y < y3; ++y) {
+		int minx, maxx;
+
+		if (y < y2) {
+			minx = (y - y1) * b1 + x1;
+			maxx = (y - y1) * b2 + x1;
+		}
+		else {
+			minx = (y - y2) * b3 + x2;
+			maxx = (y - y1) * b2 + x1;
+		}
+
+		if (minx > maxx)
+			swap(minx, maxx);
+
+		for (x = minx; x < maxx; ++x)
+			pe_setpoint(ctx->target, x, y, &(ctx->mat->color));
+	}
+}
+
+/*
+// Slower, but more stable algorithm for triangle filling
+//
+
 static double
 rotate(double x0, double y0, double x1, double y1, double x2, double y2)
 {
@@ -156,12 +220,9 @@ fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
 	int miny, maxy;
 	int minx, maxx;
 
-	x1 = (t[0].x + 1.0) * ctx->target->w * 0.5;
-	x2 = (t[1].x + 1.0) * ctx->target->w * 0.5;
-	x3 = (t[2].x + 1.0) * ctx->target->w * 0.5;
-	y1 = (t[0].y + 1.0) * ctx->target->h * 0.5;
-	y2 = (t[1].y + 1.0) * ctx->target->h * 0.5;
-	y3 = (t[2].y + 1.0) * ctx->target->h * 0.5;
+	x1 = t[0].x;	y1 = t[0].y;
+	x2 = t[1].x;	y2 = t[1].y;
+	x3 = t[2].x;	y3 = t[2].y;
 
 	miny = MIN(y1, MIN(y2, y3));
 	maxy = MAX(y1, MAX(y2, y3));
@@ -183,7 +244,7 @@ fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
 		}
 	}
 }
-
+*/
 static inline int
 isbackface(struct vec4 t[3])
 {
@@ -222,11 +283,13 @@ int
 pe_render(struct pe_context *c)
 {
 	int i, j;
-	struct mat4 res, prj;
+	struct mat4 res, prj, vp;
 
 	mat4transpose(&prj, &c->perspmat);
 	mat4transpose(&res, &c->worldmat);
+	mat4transpose(&vp, &c->viewportmat);
 	mat4mult(&res, &res, &prj);
+	mat4mult(&res, &res, &vp);
 	mat4transpose(&res, &res);
 
 	for (i = 0; i < c->index->length; i += 3) {
