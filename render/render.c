@@ -128,7 +128,7 @@ static void
 stroke_triangle(const struct pe_context *c, struct vec4 t[3])
 {
 	int i;
-	
+
 	for (i = 0; i <= 3; i++) {
 		int x, y;
 

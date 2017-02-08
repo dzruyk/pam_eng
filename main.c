@@ -75,28 +75,29 @@ int
 draw(cairo_surface_t *sur, void *userdata)
 {
 	struct renderdata *rd;
-	unsigned char *surdata;
 	int surw, surh;
+	unsigned char *destline, *srcline;
+	int deststride;
 	int i, j;
 
 	rd = userdata;
 
+	destline = cairo_image_surface_get_data(sur);
+	deststride = cairo_image_surface_get_stride(sur);
 	surw = cairo_image_surface_get_width(sur);
 	surh = cairo_image_surface_get_height(sur);
-	surdata = cairo_image_surface_get_data(sur);
+
+	srcline = rd->sur.data + (surh - 1) * surw * 3;
 
 	for (i = 0; i < surh; ++i) {
-		unsigned char *inputline;
-		unsigned char *outputline;
-
-		inputline = surdata + i * surw * 4;
-		outputline = rd->sur.data + (surh - i - 1) * surw * 3;
-
 		for (j = 0; j < surw; ++j) {
-			inputline[j * 4 + 0] = outputline[j * 3 + 2];
-			inputline[j * 4 + 1] = outputline[j * 3 + 1];
-			inputline[j * 4 + 2] = outputline[j * 3 + 0];
+			destline[j * 4 + 0] = srcline[j * 3 + 2];
+			destline[j * 4 + 1] = srcline[j * 3 + 1];
+			destline[j * 4 + 2] = srcline[j * 3 + 0];
 		}
+
+		destline += deststride;
+		srcline -= surw * 3;
 	}
 
 	return 0;
@@ -223,7 +224,7 @@ main(int argc, char **argv)
 		mat4persp(&perspmat, 1, 100, -1, 1, -1, 1));
 
 //	rd.context.conf.wired = 1;
-	
+
 	pe_cammove(&rd.context.worldmat, 0, 0, -2.);
 
 	guidata.defaultcallback = render;
