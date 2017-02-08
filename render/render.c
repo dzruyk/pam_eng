@@ -1,6 +1,7 @@
 #include "macros.h"
 #include "render.h"
 #include "surface.h"
+#include "mesh.h"
 
 struct pe_material pe_defmat = { {1.0, 1.0, 1.0, 1.0} };
 
@@ -230,12 +231,12 @@ pe_render(struct pe_context *c)
 	mat4transpose(&res, &res);
 
 	for (i = 0; i < c->index->length; i += 3) {
-		int *pidx;
+		struct pe_vidx *pidx;
 		struct vec4 *pa, triangle[3];
 
 		pidx = dbuf_get(c->index, i);
 		for (j = 0; j < 3; j++) {
-			pa = dbuf_get(c->vertex, pidx[j]);
+			pa = dbuf_get(c->vertex, pidx[j].v);
 			pa->w = 1;
 
 			pa = mat4vec(&triangle[j], &res, pa);

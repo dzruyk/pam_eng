@@ -9,31 +9,23 @@
 
 #define BUFSZ 1024
 
-struct vert_idx {
-	struct vec3int v;
-	struct vec3int n;
-	struct vec3int t;
-};
 
 static void parse_vertex(const char *line, struct vec4 *v);
-static int parse_face(const char *line, struct vec3int *v);
+static int parse_face(const char *line, struct pe_vidx *v);
 
 void
 pe_objload(struct mesh *m, const char *fname)
 {
-	struct vertex v;
+	struct vec4 v;
 	struct vec4 va;
-	struct vec3int f;
-	struct dbuf bnorm;
+	struct pe_vidx f[3];
 	FILE *fp;
 	char buf[BUFSZ];
-	int i, nnorm, npoints;
+	int i, nnorm, ntexture, npoints;
 
 	assert(m != NULL);
 
-	dbuf_init(&bnorm, sizeof(struct vec4));
-
-	npoints = nnorm = 0;
+	npoints = nnorm = ntexture = 0;
 
 	fp = fopen(fname, "rb");
 	if (fp == NULL)
@@ -41,8 +33,6 @@ pe_objload(struct mesh *m, const char *fname)
 
 
 	while (fgets(buf, sizeof(buf), fp) != NULL) {
-		if (buf[1] != ' ')
-			continue;
 
 		if (buf[0] == 'v') {
 
@@ -50,24 +40,38 @@ pe_objload(struct mesh *m, const char *fname)
 				npoints++;
 				memset(&v, 0, sizeof(v));
 
-				parse_vertex(buf + 2, &v.pos);
+				parse_vertex(buf + 2, &v);
 				dbuf_push(&m->vertex, &v);
 
-			} else if (buf[1] == 'n') {
+			} else if (buf[1] == 'n' && buf[2] == ' ') {
+				memset(&va, 0, sizeof(va));
 
 				parse_vertex(buf + 3, &va);
-				dbuf_push(&bnorm, &va);
+				//push as vec3
+				dbuf_push(&m->norm, &va);
 				nnorm++;
+			} else if (buf[1] == 't' && buf[2] == ' ') {
+				memset(&va, 0, sizeof(va));
+
+				parse_vertex(buf + 3, &va);
+				//push as vec3
+				dbuf_push(&m->text, &va);
+				ntexture++;
 			}
 
-		} else if (buf[0] == 'f') {
+		} else if (buf[0] == 'f' && buf[1] == ' ') {
 			memset(&f, 0, sizeof(f));
 
-			parse_face(buf + 1, &f);
+			parse_face(buf + 1, f);
 			for (i = 0; i < 3; i++)
-				dbuf_push(&m->idx, &f.arr[i]);
+				dbuf_push(&m->idx, &f[i]);
 		}
 	}
+
+	printf("OBJFILE:\n"
+	       "texture points = %d\n"
+	       "norm points = %d\n"
+	       "points = %d\n", ntexture, nnorm, npoints);
 
 	fclose(fp);
 }
@@ -80,24 +84,45 @@ parse_vertex(const char *line, struct vec4 *v)
 
 //TODO: parse normals and textures vectors
 static int
-parse_face_row(const char *l, int *idx)
+parse_face_row(const char *l, struct pe_vidx *v)
 {
-	const char *p;
-	int ret;
-	int n, t;
+	char *p;
+	char *d = "/ \t";
 
-	p = l;
+	p = (char *)l;
 
-	*idx = atoi(l);
-	*idx -= 1;	//OBJ initail idx == 1, decrement it
+	v->v = v->n = v->t = -1;
 
-	p += strcspn(l, " \t");
+	//OBJ initail idx is 1, decrement it
+	// v
+	v->v = atoi(l) - 1;
+	p = l + strcspn(l, d);
+	if (p[0] != '/')
+		goto end;
+
+
+	// v/t
+	if (p[1] != '/') {
+		v->t = atoi(p + 1) - 1;
+		p += strcspn(l, d);
+		if (p[0] != '/')
+			goto end;
+	} else {
+		// v//n
+		p++;
+	}
+
+	// v/t/n
+	v->n = atoi(p + 1);
+
+end:
+	p += strcspn(p, " \t");
 
 	return p - l;
 }
 
 static int
-parse_face(const char *line, struct vec3int *v)
+parse_face(const char *line, struct pe_vidx *v)
 {
 	int i, n;
 	const char *p;
@@ -113,7 +138,7 @@ parse_face(const char *line, struct vec3int *v)
 			return 1;
 		}
 		p += n;
-		p += parse_face_row(p, &v->arr[i]);
+		p += parse_face_row(p, &v[i]);
 	}
 
 	return 0;
