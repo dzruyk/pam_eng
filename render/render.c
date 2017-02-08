@@ -16,7 +16,7 @@ pe_safefree(void **p)
 int
 pe_initcontext(struct pe_context *c)
 {
-	c->conf.usetexture = 0;
+	c->conf.wired = 0;
 
 	mat4identity(&c->worldmat);
 	mat4identity(&c->perspmat);
@@ -124,7 +124,7 @@ pe_settexture(struct pe_context *c, const struct pe_surface *sur)
 	return 0;
 }
 
-void
+static void
 stroke_triangle(const struct pe_context *c, struct vec4 t[3])
 {
 	int i;
@@ -142,8 +142,11 @@ stroke_triangle(const struct pe_context *c, struct vec4 t[3])
 	}
 }
 
-//TODO: add rotate function ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0))
-//      
+static double
+rotate(double x0, double y0, double x1, double y1, double x2, double y2)
+{
+	return ((x2 - x1) * (y0 - y2) - (y2 - y1) * (x0 - x2));
+}
 
 void
 fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
@@ -154,11 +157,11 @@ fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
 	int minx, maxx;
 
 	x1 = (t[0].x + 1.0) * ctx->target->w * 0.5;
-	x2 = (t[1].x + 1.0) * ctx->target->h * 0.5;
+	x2 = (t[1].x + 1.0) * ctx->target->w * 0.5;
 	x3 = (t[2].x + 1.0) * ctx->target->w * 0.5;
-	y1 = (t[0].y + 1.0) * ctx->target->w * 0.5;
-	y2 = (t[1].y + 1.0) * ctx->target->w * 0.5;
-	y3 = (t[2].y + 1.0) * ctx->target->w * 0.5;
+	y1 = (t[0].y + 1.0) * ctx->target->h * 0.5;
+	y2 = (t[1].y + 1.0) * ctx->target->h * 0.5;
+	y3 = (t[2].y + 1.0) * ctx->target->h * 0.5;
 
 	miny = MIN(y1, MIN(y2, y3));
 	maxy = MAX(y1, MAX(y2, y3));
@@ -167,43 +170,52 @@ fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
 
 	for (x0 = minx; x0 <= maxx; x0++) {
 		for (y0 = miny; y0 <= maxy; y0++) {
-			if ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0) <= 0 &&
-				(x2 - x0) * (y3 - y2) - (x3 - x2) * (y2 - y0) <= 0 &&
-				(x3 - x0) * (y1 - y3) - (x1 - x3) * (y3 - y0) <= 0)
-				pe_setpoint(ctx->target, x0, y0, &(ctx->mat->color));
-			else if ((x1 - x0) * (y2 - y1) - (x2 - x1) * (y1 - y0) >= 0 &&
-				(x2 - x0) * (y3 - y2) - (x3 - x2) * (y2 - y0) >= 0 &&
-				(x3 - x0) * (y1 - y3) - (x1 - x3) * (y3 - y0) >= 0)
-				pe_setpoint(ctx->target, x0, y0, &(ctx->mat->color));
+			double s1, s2, s3;
+
+			s1 = rotate(x0, y0, x1, y1, x2, y2);
+			s2 = rotate(x0, y0, x2, y2, x3, y3);
+			s3 = rotate(x0, y0, x3, y3, x1, y1);
+
+			if ((s1 >= 0 && s2 >= 0 && s3 >= 0)
+				|| (s1 < 0 && s2 < 0 && s3 < 0))
+				pe_setpoint(ctx->target, x0, y0,
+					&(ctx->mat->color));
 		}
 	}
 }
 
-static inline void
-draw_triangle(const struct pe_context *ctx, struct vec4 t[3])
+static inline int
+isbackface(struct vec4 t[3])
 {
-	int i;
-	struct vec3 a, b, c;
 	struct vec3 viewdir = {.arr = {0, 0, -1}};
+	struct vec3 a, b, c;
 	double r;
 
-	for (i = 0; i < 3; i++) {
-		if (t[i].z < -1. || t[i].z > 1.)
-			return;
-	}
-
-	// Backface culling
 	vec3sub(&a, (struct vec3 *)&t[1], (struct vec3 *)&t[0]);
 	vec3sub(&b, (struct vec3 *)&t[2], (struct vec3 *)&t[0]);
 	vec3cross(&c, &a, &b);
 
 	r = vec3dot(&c, &viewdir);
 
-	if (r > 0)
+	return (r > 0);
+}
+
+static inline void
+draw_triangle(const struct pe_context *c, struct vec4 t[3])
+{
+	int i;
+
+	for (i = 0; i < 3; i++)
+		if (t[i].z < -1. || t[i].z > 1.)
+			return;
+
+	if (isbackface(t))
 		return;
 
-	fill_triangle(ctx, t);
-//	stroke_triangle(ctx, t);
+	if (!(c->conf.wired))
+		fill_triangle(c, t);
+	else
+		stroke_triangle(c, t);
 }
 
 int
@@ -212,8 +224,6 @@ pe_render(struct pe_context *c)
 	int i, j;
 	struct mat4 res, prj;
 
-	pe_setperspmatrix((struct pe_context *)c,
-		mat4persp(&prj, 1, 100, -1, 1, -1, 1));
 	mat4transpose(&prj, &c->perspmat);
 	mat4transpose(&res, &c->worldmat);
 	mat4mult(&res, &res, &prj);

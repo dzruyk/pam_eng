@@ -14,7 +14,7 @@ struct pe_material {
 struct pe_material pe_defmat;
 
 struct pe_contextconf {
-	int usetexture;
+	int wired;
 };
 
 struct pe_context

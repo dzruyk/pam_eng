@@ -38,29 +38,6 @@ find_visual(xcb_connection_t *c, xcb_visualid_t v)
 	return NULL;
 }
 
-static int
-blocksigalrm(sigset_t *oldmask)
-{
-	sigset_t newmask;
-
-	sigemptyset(&newmask);
-	sigaddset(&newmask, SIGALRM);
-
-	if (sigprocmask(SIG_BLOCK, &newmask, oldmask) < 0)
-		return (-1);
-
-	return 0;
-}
-
-static int
-unblocksigalrm(sigset_t *oldmask)
-{
-	if (sigprocmask(SIG_SETMASK, oldmask, NULL) < 0)
-		return (-1);
-
-	return 0;
-}
-
 int
 initgui(struct xdata *guidata, int w, int h)
 {
@@ -137,13 +114,15 @@ mainloop(struct xdata *guidata, void *userdata)
 {
 	while (1) {
 		xcb_generic_event_t *event;
-		sigset_t oldmask;
 		xcb_key_symbols_t *ks;
 		xcb_keysym_t keysym;
 
 		event = xcb_poll_for_event(guidata->connection);
 
 		if (event == NULL) {
+			if (guidata->defaultcallback == NULL)
+				continue;
+
 			guidata->defaultcallback(userdata);
 
 			windowforceredraw(guidata->connection,
@@ -152,10 +131,11 @@ mainloop(struct xdata *guidata, void *userdata)
 			continue;
 		}
 
-		blocksigalrm(&oldmask);
-
 		switch (event->response_type & ~0x80) {
 		case XCB_EXPOSE:
+			if (guidata->drawcallback == NULL)
+				break;
+
 			guidata->drawcallback(guidata->sur, userdata);
 
 			cairo_set_source_surface(guidata->cr,
@@ -167,6 +147,9 @@ mainloop(struct xdata *guidata, void *userdata)
 			break;
 
 		case XCB_KEY_PRESS:
+			if (guidata->keypresscallback == NULL)
+				break;
+
 			ks = xcb_key_symbols_alloc(guidata->connection);
 
 			keysym = xcb_key_symbols_get_keysym(ks,
@@ -179,6 +162,9 @@ mainloop(struct xdata *guidata, void *userdata)
 			break;
 
 		case XCB_MOTION_NOTIFY:
+			if (guidata->motioncallback == NULL)
+				break;
+
 			guidata->motioncallback(
 				((xcb_motion_notify_event_t *) event)->event_x,
 				((xcb_motion_notify_event_t *) event)->event_y,
@@ -187,6 +173,9 @@ mainloop(struct xdata *guidata, void *userdata)
 			break;
 
 		case XCB_BUTTON_PRESS:
+			if (guidata->buttonpresscallback == NULL)
+				break;
+
 			guidata->buttonpresscallback(
 				((xcb_button_press_event_t *)event)->detail,
 				userdata);
@@ -195,7 +184,10 @@ mainloop(struct xdata *guidata, void *userdata)
 
 
 		case XCB_BUTTON_RELEASE:
-				guidata->buttonreleasecallback(
+			if (guidata->buttonreleasecallback == NULL)
+				break;
+
+			guidata->buttonreleasecallback(
 				((xcb_button_press_event_t *)event)->detail,
 				userdata);
 
@@ -204,8 +196,6 @@ mainloop(struct xdata *guidata, void *userdata)
 		default:
 			break;
 		}
-
-		unblocksigalrm(&oldmask);
 
 		free(event);
 		xcb_flush(guidata->connection);

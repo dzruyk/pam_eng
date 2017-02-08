@@ -364,7 +364,8 @@ mat4transpose(struct mat4 *res, const struct mat4 *src)
 }
 
 struct mat4 *
-mat4persp(struct mat4 *res, double near, double far, double left, double right, double bot, double top)
+mat4persp(struct mat4 *res, double near, double far,
+	double left, double right, double bot, double top)
 {
 	double x, y;
 	double a, b, c, d;

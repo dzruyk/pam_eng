@@ -14,8 +14,8 @@
 #include "camera.h"
 #include "gui.h"
 
-#define SURWIDTH 1080
-#define SURHEIGHT 1080
+#define SURWIDTH 1280
+#define SURHEIGHT 720
 
 char *usg = "usage: %s [OPTS] input.obj\n";
 
@@ -195,6 +195,7 @@ main(int argc, char **argv)
 {
 	struct renderdata rd;
 	struct xdata guidata;
+	struct mat4 perspmat;
 
 	if (argc < 2)
 		usage(argv[0]);
@@ -217,6 +218,12 @@ main(int argc, char **argv)
 
 	pe_initcontext(&(rd.context));
 	pe_settarget(&(rd.context), &(rd.sur));
+
+	pe_setperspmatrix(&(rd.context),
+		mat4persp(&perspmat, 1, 100, -1, 1, -1, 1));
+
+//	rd.context.conf.wired = 1;
+	
 	pe_cammove(&rd.context.worldmat, 0, 0, -2.);
 
 	guidata.defaultcallback = render;
