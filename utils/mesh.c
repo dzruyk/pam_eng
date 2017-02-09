@@ -7,39 +7,41 @@
 void
 pe_meshinit(struct mesh *m)
 {
-	dbuf_init(&m->vertex, sizeof(struct vertex));
-	dbuf_init(&m->idx, sizeof(int));
+	dbuf_init(&m->vertex, sizeof(struct vec4));
+	dbuf_init(&m->norm, sizeof(struct vec3));
+	dbuf_init(&m->text, sizeof(struct vec3));
+	dbuf_init(&m->idx, sizeof(struct pe_vidx));
 }
 
 void
 pe_meshnormalize(struct mesh *m)
 {
 	int i, nverts;
-	struct vertex *v;
+	struct vec4 *v;
 	double lx, ly;
 	double ux, uy;
 	double cx, cy;
 	double dx, dy;
 	double dmax;
 
-	v = (struct vertex *) dbuf_get(&m->vertex, 0);
-	lx = ux = v->pos.x;
-	ly = uy = v->pos.y;
+	v = (struct vec4 *) dbuf_get(&m->vertex, 0);
+	lx = ux = v->x;
+	ly = uy = v->y;
 
 	nverts = m->vertex.length;
 	for (i = 1; i < nverts; i++) {
-		v = (struct vertex *) dbuf_get(&m->vertex, i);
+		v = dbuf_get(&m->vertex, i);
 
 		assert(v != NULL);
 
-		if (lx > v->pos.x)
-			lx = v->pos.x;
-		if (ly > v->pos.y)
-			ly = v->pos.y;
-		if (ux < v->pos.x)
-			ux = v->pos.x;
-		if (uy < v->pos.y)
-			uy = v->pos.y;
+		if (lx > v->x)
+			lx = v->x;
+		if (ly > v->y)
+			ly = v->y;
+		if (ux < v->x)
+			ux = v->x;
+		if (uy < v->y)
+			uy = v->y;
 	}
 
 	cx = (lx + ux) / 2;
@@ -56,16 +58,18 @@ pe_meshnormalize(struct mesh *m)
 	assert(dmax != 0);
 
 	for (i = 0; i < nverts; i++) {
-		v = (struct vertex *) dbuf_get(&m->vertex, i);
-		v->pos.x = (v->pos.x - cx) / dmax;
-		v->pos.y = (v->pos.y - cy) / dmax;
+		v = dbuf_get(&m->vertex, i);
+		v->x = (v->x - cx) / dmax;
+		v->y = (v->y - cy) / dmax;
 	}
 }
 
 void
 pe_meshclean(struct mesh *m)
 {
-	dbuf_free(&m->vertex);
 	dbuf_free(&m->idx);
+	dbuf_free(&m->text);
+	dbuf_free(&m->norm);
+	dbuf_free(&m->vertex);
 }
 
