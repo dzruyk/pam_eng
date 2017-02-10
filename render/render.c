@@ -8,6 +8,8 @@
 
 struct pe_material pe_defmat = { {1.0, 1.0, 1.0, 1.0} };
 
+struct pe_surface sur;
+
 void
 pe_safefree(void **p)
 {
@@ -22,6 +24,8 @@ pe_initcontext(struct pe_context *c)
 {
 	c->conf.wired = 0;
 
+	pe_surfromfile("body_color.png", &sur);
+	
 	mat4identity(&c->worldmat);
 	mat4identity(&c->perspmat);
 	mat4identity(&c->viewportmat);
@@ -188,7 +192,8 @@ static double interpz(double z1, double z2, double t)
 
 static double interpattr(double a1, double z1, double a2, double z2, double t)
 {
-	return ((1.0 - t) * a1 / z1 + t * a2 / z2);
+//	return ((1.0 - t) * a1 / z1 + t * a2 / z2);
+	return ((1.0 - t) * a1 + t * a2);
 }
 
 void
@@ -260,8 +265,22 @@ fill_triangle(const struct pe_context *ctx,
 				/ pointdist(x1, y1, x2, y2);
 
 			zs0 = interpz(z1, z2, t);
+/*
 			us0 = zs0 * interpattr(u1, z1, u2, z2, t);
 			vs0 = zs0 * interpattr(v1, z1, v2, z2, t);
+*/
+			us0 = interpattr(u1, z1, u2, z2, t);
+			vs0 = interpattr(v1, z1, v2, z2, t);
+
+
+/*	
+			if (us0 < 0.0 || us0 > 1.0 || vs0 < 0.0 || vs0 > 1.0) {
+				printf("%f %f\n%f %f\n", u1, u2, v1, v2);
+				printf("%f %f\n", z1, z2);
+
+				printf("%f %f\n\n", us0, vs0);
+			}
+*/
 		}
 		else {
 			minx = (y - y2) * b3 + x2;
@@ -271,8 +290,14 @@ fill_triangle(const struct pe_context *ctx,
 				/ pointdist(x2, y2, x3, y3);
 
 			zs0 = interpz(z2, z3, t);
+/*
 			us0 = zs0 * interpattr(u2, z2, u3, z3, t);
 			vs0 = zs0 * interpattr(v2, z2, v3, z3, t);
+*/
+			us0 = interpattr(u2, z2, u3, z3, t);
+			vs0 = interpattr(v2, z2, v3, z3, t);
+
+
 		}
 
 		if (minx > maxx) {
@@ -283,13 +308,23 @@ fill_triangle(const struct pe_context *ctx,
 		}
 
 		for (x = minx; x < maxx; ++x) {
+			struct pe_color col;
+
 			t = (double) (x - minx) / (maxx - minx);
 
 			z = interpz(zs0, zs1, t);
+/*
 			u = z * interpattr(us0, zs0, us1, zs1, t);
 			v = z * interpattr(vs0, zs0, vs1, zs1, t);
+*/
+			u = interpattr(us0, zs0, us1, zs1, t);
+			v = interpattr(vs0, zs0, vs1, zs1, t);
 
-			pe_setpoint(ctx->target, x, y, &(ctx->mat->color));
+		//	printf("%f %f\n", u, v);
+
+			pe_getpoint(&sur, u, v, &col);
+			pe_setpoint(ctx->target, x, y, &col);
+//			pe_setpoint(ctx->target, x, y, &(ctx->mat->color));
 		}
 	}
 }
