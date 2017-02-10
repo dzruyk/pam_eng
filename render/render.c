@@ -1,3 +1,6 @@
+#include <string.h>
+#include <math.h>
+
 #include "macros.h"
 #include "render.h"
 #include "surface.h"
@@ -113,6 +116,26 @@ pe_setindex(struct pe_context *c, const struct dbuf *idx)
 	return 0;
 }
 
+int pe_setnorm(struct pe_context *c, const struct dbuf *norm)
+{
+	if (c == NULL || norm == NULL)
+		return (-1);
+
+	c->norm = norm;
+
+	return 0;
+}
+
+int pe_settexcoord(struct pe_context *c, const struct dbuf *texcoord)
+{
+	if (c == NULL || texcoord == NULL)
+		return (-1);
+
+	c->texcoord = texcoord;
+
+	return 0;
+}
+
 int
 pe_setmaterial(struct pe_context *c, const struct pe_material *mat)
 {
@@ -136,15 +159,15 @@ pe_settexture(struct pe_context *c, const struct pe_surface *sur)
 }
 
 static void
-stroke_triangle(const struct pe_context *c, struct vec4 t[3])
+stroke_triangle(const struct pe_context *c, const struct vec4 t[3])
 {
 	int i;
 
 	for (i = 0; i <= 3; i++) {
 		int x, y;
 
-		x = (t[i % 3].x + 1.0) * c->target->w * 0.5;
-		y = (t[i % 3].y + 1.0) * c->target->h * 0.5;
+		x = t[i % 3].x;
+		y = t[i % 3].y;
 
 		if (i == 0)
 			pe_setpos(x, y);
@@ -153,30 +176,62 @@ stroke_triangle(const struct pe_context *c, struct vec4 t[3])
 	}
 }
 
-void
-fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
+static double pointdist(int x1, int y1, int x2, int y2)
 {
-	int x1, x2, x3, y1, y2, y3;
+	return sqrt(pow(y2 - y1, 2) + pow(x2 - x1, 2));
+}
+
+static double interpz(double z1, double z2, double t)
+{
+	return (1.0 / ((1.0 - t) / z1 + t / z2));
+}
+
+static double interpattr(double a1, double z1, double a2, double z2, double t)
+{
+	return ((1.0 - t) * a1 / z1 + t * a2 / z2);
+}
+
+void
+fill_triangle(const struct pe_context *ctx,
+	const struct vec4 tr[3], const struct vec3 tex[3])
+{
+	int x1, x2, x3;
+	int y1, y2, y3;
+	double z1, z2, z3;
+	double u1, u2, u3;
+	double v1, v2, v3;
 	double b1, b2, b3;
 	int x, y;
 
-	x1 = t[0].x;	y1 = t[0].y;
-	x2 = t[1].x;	y2 = t[1].y;
-	x3 = t[2].x;	y3 = t[2].y;
+	x1 = tr[0].x;	y1 = tr[0].y;	
+		z1 = tr[0].z;	u1 = tex[0].x;	v1 = tex[0].y;
+	x2 = tr[1].x;	y2 = tr[1].y;
+		z2 = tr[1].z;	u2 = tex[1].x;	v2 = tex[1].y;
+	x3 = tr[2].x;	y3 = tr[2].y;
+		z3 = tr[2].z;	u3 = tex[2].x;	v3 = tex[2].y;
 
 	if (y1 > y2) {
-		swap(y1, y2);
 		swap(x1, x2);
+		swap(y1, y2);
+		swap(z1, z2);
+		swap(u1, u2);
+		swap(v1, v2);
 	}
 
 	if (y2 > y3) {
-		swap(y2, y3);
 		swap(x2, x3);
+		swap(y2, y3);
+		swap(z2, z3);
+		swap(u2, u3);
+		swap(v2, v3);
 	}
 
 	if (y1 > y2) {
-		swap(y1, y2);
 		swap(x1, x2);
+		swap(y1, y2);
+		swap(z1, z2);
+		swap(u1, u2);
+		swap(v1, v2);
 	}
 
 	b1 = (y2 - y1) ? ((double) (x2 - x1) / (y2 - y1)) : 0.0;
@@ -186,20 +241,56 @@ fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
 	for (y = y1; y < y3; ++y) {
 		int minx, maxx;
 
+		double us0, vs0, zs0;
+		double us1, vs1, zs1;
+		double u, v, z;
+		double t;
+
+		t = pointdist(x1, y1, maxx, y)
+			/ pointdist(x1, y1, x3, y3);
+		zs1 = interpz(z1, z3, t);
+		us1 = zs1 * interpattr(u1, z1, u3, z3, t);
+		vs1 = zs1 * interpattr(v1, z1, v3, z3, t);
+
 		if (y < y2) {
 			minx = (y - y1) * b1 + x1;
 			maxx = (y - y1) * b2 + x1;
+
+			t = pointdist(x1, y1, minx, y)
+				/ pointdist(x1, y1, x2, y2);
+
+			zs0 = interpz(z1, z2, t);
+			us0 = zs0 * interpattr(u1, z1, u2, z2, t);
+			vs0 = zs0 * interpattr(v1, z1, v2, z2, t);
 		}
 		else {
 			minx = (y - y2) * b3 + x2;
 			maxx = (y - y1) * b2 + x1;
+
+			t = pointdist(x2, y2, minx, y)
+				/ pointdist(x2, y2, x3, y3);
+
+			zs0 = interpz(z2, z3, t);
+			us0 = zs0 * interpattr(u2, z2, u3, z3, t);
+			vs0 = zs0 * interpattr(v2, z2, v3, z3, t);
 		}
 
-		if (minx > maxx)
+		if (minx > maxx) {
 			swap(minx, maxx);
+			swap(zs0, zs1);
+			swap(us0, us1);
+			swap(vs0, vs1);
+		}
 
-		for (x = minx; x < maxx; ++x)
+		for (x = minx; x < maxx; ++x) {
+			t = (double) (x - minx) / (maxx - minx);
+
+			z = interpz(zs0, zs1, t);
+			u = z * interpattr(us0, zs0, us1, zs1, t);
+			v = z * interpattr(vs0, zs0, vs1, zs1, t);
+
 			pe_setpoint(ctx->target, x, y, &(ctx->mat->color));
+		}
 	}
 }
 
@@ -246,8 +337,9 @@ fill_triangle(const struct pe_context *ctx, struct vec4 t[3])
 	}
 }
 */
+
 static inline int
-isbackface(struct vec4 t[3])
+isbackface(const struct vec4 t[3])
 {
 	struct vec3 viewdir = {.arr = {0, 0, -1}};
 	struct vec3 a, b, c;
@@ -263,7 +355,8 @@ isbackface(struct vec4 t[3])
 }
 
 static inline void
-draw_triangle(const struct pe_context *c, struct vec4 t[3])
+draw_triangle(const struct pe_context *c,
+	const struct vec4 t[3], const struct vec3 tex[3])
 {
 	int i;
 
@@ -275,7 +368,7 @@ draw_triangle(const struct pe_context *c, struct vec4 t[3])
 		return;
 
 	if (!(c->conf.wired))
-		fill_triangle(c, t);
+		fill_triangle(c, t, tex);
 	else
 		stroke_triangle(c, t);
 }
@@ -296,6 +389,7 @@ pe_render(struct pe_context *c)
 	for (i = 0; i < c->index->length; i += 3) {
 		struct pe_vidx *pidx;
 		struct vec4 *pa, triangle[3];
+		struct vec3 tex[3];
 
 		pidx = dbuf_get(c->index, i);
 		for (j = 0; j < 3; j++) {
@@ -308,9 +402,12 @@ pe_render(struct pe_context *c)
 			pa->y /= pa->w;
 			pa->z /= pa->w;
 			pa->w = 1;
+			
+			memcpy(tex + j, dbuf_get(c->texcoord, pidx[j].t),
+				sizeof(struct vec3));
 		}
 
-		draw_triangle(c, triangle);
+		draw_triangle(c, triangle, tex);
 	}
 
 	return 0;

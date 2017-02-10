@@ -61,6 +61,10 @@ render(void *userdata)
 		(const struct dbuf *) &(rd->m.vertex));
 	pe_setindex(&(rd->context),
 		(const struct dbuf *) &(rd->m.idx));
+	pe_setnorm(&(rd->context),
+		(const struct dbuf *) &(rd->m.norm));
+	pe_settexcoord(&(rd->context),
+		(const struct dbuf *) &(rd->m.text));
 	pe_setmaterial(&(rd->context), &(rd->mat));
 
 	pe_render(&(rd->context));

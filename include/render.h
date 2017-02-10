@@ -31,6 +31,8 @@ struct pe_context
 
 	const struct dbuf *vertex;
 	const struct dbuf *index;
+	const struct dbuf *norm;
+	const struct dbuf *texcoord;
 };
 
 int pe_initcontext(struct pe_context *c);
@@ -48,6 +50,10 @@ int pe_setperspmatrix(struct pe_context *c, struct mat4 *m);
 int pe_setvertex(struct pe_context *c, const struct dbuf *v);
 
 int pe_setindex(struct pe_context *c, const struct dbuf *idx);
+
+int pe_setnorm(struct pe_context *c, const struct dbuf *norm);
+
+int pe_settexcoord(struct pe_context *c, const struct dbuf *texcoord);
 
 int pe_setmaterial(struct pe_context *c, const struct pe_material *mat);
 
