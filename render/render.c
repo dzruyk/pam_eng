@@ -200,11 +200,20 @@ zbuf_cmp(const struct pe_context *c, int x, int y,
 	int xa, xb;
 	double z, za, zb;
 
-	if (y > y2 && y2 != y1) {
+	if (y > y2) {
+		if (y2 == y1) {
+			z = z1 + (z2 - z1) * (x - x1) / (x2 - x1);
+			goto zb_cmp;
+		}
+
 		xa = x1 + (x2 - x1) * (y - y1) / (y2 - y1);
 		za = z1 + (z2 - z1) * (y - y1) / (y2 - y1);
 	}
-	else if (y3 != y2){
+	else {
+		if (y3 == y2) {
+			z = z2 + (z3 - z2) * (x - x2) / (x3 - x2);
+			goto zb_cmp;
+		}
 		xa = x2 + (x3 - x2) * (y - y2) / (y3 - y2);
 		za = z2 + (z3 - z2) * (y - y2) / (y3 - y2);
 	}
@@ -213,6 +222,8 @@ zbuf_cmp(const struct pe_context *c, int x, int y,
 	zb = z1 + (z3 - z1) * (y - y1) / (y3 - y1);
 
 	z = za + (zb - za) * (x - xa) / (xb - xa);
+
+zb_cmp:
 
 	if (z < zbuf[c->target->w * y + x]) {
 		zbuf[c->target->w * y + x] = z;
@@ -225,8 +236,8 @@ zbuf_cmp(const struct pe_context *c, int x, int y,
 struct pe_color *
 zbuf_color(const struct pe_context *ctx, double *zbuf, struct pe_color *c, int x, int y)
 {
-	c->r = c->g = c->b = 1.0;
-	c->a = zbuf[ctx->target->w * y + x] / 10.0;
+	c->r = c->g = c->b = zbuf[ctx->target->w * y + x];
+	c->a = 1.0;
 
 	return c;
 }
