@@ -21,6 +21,7 @@ struct pe_context
 {
 	struct pe_contextconf conf;
 	struct pe_surface *target;
+	struct pe_surface *zbuffer;
 
 	struct mat4 worldmat;
 	struct mat4 perspmat;

@@ -24,7 +24,7 @@ pe_initcontext(struct pe_context *c)
 {
 	c->conf.wired = 0;
 
-	pe_surfromfile("body_color.png", &sur);
+	pe_surfromfile("african_head_diffuse.png", &sur);
 	
 	mat4identity(&c->worldmat);
 	mat4identity(&c->perspmat);
@@ -51,10 +51,13 @@ pe_settarget(struct pe_context *c, struct pe_surface *sur)
 	c->target = sur;
 
 	s = MIN(c->target->w, c->target->h) * 0.5;
-
 	mat4scale(&tmpm, s, s, 1.0);
 	mat4move(&(c->viewportmat), 1.0, 1.0, 0.0);
 	mat4mult(&(c->viewportmat), &tmpm, &(c->viewportmat));
+
+	c->zbuffer = malloc(sizeof(struct pe_surface));
+	pe_createsur(c->zbuffer, c->target->w, c->target->h, SF_GRAYSCALE);
+	
 
 	return 0;
 }
@@ -192,8 +195,7 @@ static double interpz(double z1, double z2, double t)
 
 static double interpattr(double a1, double z1, double a2, double z2, double t)
 {
-//	return ((1.0 - t) * a1 / z1 + t * a2 / z2);
-	return ((1.0 - t) * a1 + t * a2);
+	return ((1.0 - t) * a1 / z1 + t * a2 / z2);
 }
 
 void
@@ -251,27 +253,22 @@ fill_triangle(const struct pe_context *ctx,
 		double u, v, z;
 		double t;
 
-		t = pointdist(x1, y1, maxx, y)
-			/ pointdist(x1, y1, x3, y3);
-		zs1 = interpz(z1, z3, t);
-		us1 = zs1 * interpattr(u1, z1, u3, z3, t);
-		vs1 = zs1 * interpattr(v1, z1, v3, z3, t);
-
 		if (y < y2) {
 			minx = (y - y1) * b1 + x1;
 			maxx = (y - y1) * b2 + x1;
+
+			t = pointdist(x1, y1, maxx, y)
+				/ pointdist(x1, y1, x3, y3);
+			zs1 = interpz(z1, z3, t);
+			us1 = zs1 * interpattr(u1, z1, u3, z3, t);
+			vs1 = zs1 * interpattr(v1, z1, v3, z3, t);
 
 			t = pointdist(x1, y1, minx, y)
 				/ pointdist(x1, y1, x2, y2);
 
 			zs0 = interpz(z1, z2, t);
-/*
 			us0 = zs0 * interpattr(u1, z1, u2, z2, t);
 			vs0 = zs0 * interpattr(v1, z1, v2, z2, t);
-*/
-			us0 = interpattr(u1, z1, u2, z2, t);
-			vs0 = interpattr(v1, z1, v2, z2, t);
-
 
 /*	
 			if (us0 < 0.0 || us0 > 1.0 || vs0 < 0.0 || vs0 > 1.0) {
@@ -286,18 +283,19 @@ fill_triangle(const struct pe_context *ctx,
 			minx = (y - y2) * b3 + x2;
 			maxx = (y - y1) * b2 + x1;
 
+
+			t = pointdist(x1, y1, maxx, y)
+				/ pointdist(x1, y1, x3, y3);
+			zs1 = interpz(z1, z3, t);
+			us1 = zs1 * interpattr(u1, z1, u3, z3, t);
+			vs1 = zs1 * interpattr(v1, z1, v3, z3, t);
+
 			t = pointdist(x2, y2, minx, y)
 				/ pointdist(x2, y2, x3, y3);
 
 			zs0 = interpz(z2, z3, t);
-/*
 			us0 = zs0 * interpattr(u2, z2, u3, z3, t);
 			vs0 = zs0 * interpattr(v2, z2, v3, z3, t);
-*/
-			us0 = interpattr(u2, z2, u3, z3, t);
-			vs0 = interpattr(v2, z2, v3, z3, t);
-
-
 		}
 
 		if (minx > maxx) {
@@ -313,18 +311,24 @@ fill_triangle(const struct pe_context *ctx,
 			t = (double) (x - minx) / (maxx - minx);
 
 			z = interpz(zs0, zs1, t);
-/*
+
 			u = z * interpattr(us0, zs0, us1, zs1, t);
 			v = z * interpattr(vs0, zs0, vs1, zs1, t);
-*/
-			u = interpattr(us0, zs0, us1, zs1, t);
-			v = interpattr(vs0, zs0, vs1, zs1, t);
 
-		//	printf("%f %f\n", u, v);
+			if (y > 0 && x > 0 && y < ctx->zbuffer->h
+				&& x < ctx->zbuffer->w) {
+				int zc;
 
-			pe_getpoint(&sur, u, v, &col);
-			pe_setpoint(ctx->target, x, y, &col);
-//			pe_setpoint(ctx->target, x, y, &(ctx->mat->color));
+				zc = ((z + 1.0) * 0.5) * 255 + 0.5;
+				
+				if (zc < ctx->zbuffer->data[y * ctx->zbuffer->w + x]) {
+					pe_getpoint(&sur, u, 1.0 - v, &col);
+					pe_setpoint(ctx->target, x, y, &col);
+				}
+			
+				ctx->zbuffer->data[y * ctx->zbuffer->w + x]
+					= zc;
+			}
 		}
 	}
 }
@@ -420,6 +424,9 @@ pe_render(struct pe_context *c)
 	mat4mult(&res, &res, &prj);
 	mat4mult(&res, &res, &vp);
 	mat4transpose(&res, &res);
+
+	for (i = 0; i < c->zbuffer->w * c->zbuffer->h; ++i)
+		c->zbuffer->data[i] = 255;
 
 	for (i = 0; i < c->index->length; i += 3) {
 		struct pe_vidx *pidx;
