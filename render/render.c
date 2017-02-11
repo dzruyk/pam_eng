@@ -191,19 +191,60 @@ static double interpattr(double a1, double z1, double a2, double z2, double t)
 	return ((1.0 - t) * a1 / z1 + t * a2 / z2);
 }
 
+int
+zbuf_cmp(const struct pe_context *c, int x, int y,
+			int x1, int y1, double z1,
+			int x2, int y2, double z2,
+			int x3, int y3, double z3, double *zbuf)
+{
+	int xa, xb;
+	double z, za, zb;
+
+	if (y > y2 && y2 != y1) {
+		xa = x1 + (x2 - x1) * (y - y1) / (y2 - y1);
+		za = z1 + (z2 - z1) * (y - y1) / (y2 - y1);
+	}
+	else if (y3 != y2){
+		xa = x2 + (x3 - x2) * (y - y2) / (y3 - y2);
+		za = z2 + (z3 - z2) * (y - y2) / (y3 - y2);
+	}
+
+	xb = x1 + (x3 - x1) * (y - y1) / (y3 - y1);
+	zb = z1 + (z3 - z1) * (y - y1) / (y3 - y1);
+
+	z = za + (zb - za) * (x - xa) / (xb - xa);
+
+	if (z < zbuf[c->target->w * y + x]) {
+		zbuf[c->target->w * y + x] = z;
+		return 1;
+	}
+
+	return 0;
+}
+
+struct pe_color *
+zbuf_color(const struct pe_context *ctx, double *zbuf, struct pe_color *c, int x, int y)
+{
+	c->r = c->g = c->b = 1.0;
+	c->a = zbuf[ctx->target->w * y + x] / 10.0;
+
+	return c;
+}
+
 void
 fill_triangle(const struct pe_context *ctx,
-	const struct vec4 tr[3], const struct vec3 tex[3])
+	const struct vec4 tr[3], const struct vec3 tex[3], double *zbuf)
 {
 	int x1, x2, x3;
 	int y1, y2, y3;
+	int x, y;
 	double z1, z2, z3;
 	double u1, u2, u3;
 	double v1, v2, v3;
 	double b1, b2, b3;
-	int x, y;
+	struct pe_color col;
 
-	x1 = tr[0].x;	y1 = tr[0].y;	
+	x1 = tr[0].x;	y1 = tr[0].y;
 		z1 = tr[0].z;	u1 = tex[0].x;	v1 = tex[0].y;
 	x2 = tr[1].x;	y2 = tr[1].y;
 		z2 = tr[1].z;	u2 = tex[1].x;	v2 = tex[1].y;
@@ -289,7 +330,10 @@ fill_triangle(const struct pe_context *ctx,
 			u = z * interpattr(us0, zs0, us1, zs1, t);
 			v = z * interpattr(vs0, zs0, vs1, zs1, t);
 
-			pe_setpoint(ctx->target, x, y, &(ctx->mat->color));
+			if (zbuf_cmp(ctx, x, y,
+				x1, y1, z1, x2, y2, z2, x3, y3, z3, zbuf))
+				pe_setpoint(ctx->target, x, y,
+						zbuf_color(ctx, zbuf, &col, x, y));
 		}
 	}
 }
@@ -356,7 +400,7 @@ isbackface(const struct vec4 t[3])
 
 static inline void
 draw_triangle(const struct pe_context *c,
-	const struct vec4 t[3], const struct vec3 tex[3])
+	const struct vec4 t[3], const struct vec3 tex[3], double *zbuf)
 {
 	int i;
 
@@ -368,9 +412,27 @@ draw_triangle(const struct pe_context *c,
 		return;
 
 	if (!(c->conf.wired))
-		fill_triangle(c, t, tex);
+		fill_triangle(c, t, tex, zbuf);
 	else
 		stroke_triangle(c, t);
+}
+
+double*
+zbuf_init(struct pe_context *c)
+{
+	double *a;
+	int i, j;
+
+	a = malloc(c->target->w * c->target->h * sizeof(double));
+
+	if (!a)
+		return NULL;
+
+	for (i = 0; i < c->target->h; i++)
+		for (j = 0; j < c->target->w; j++)
+			a[i * c->target->w + j] = 10000000.1; //SEEMS LIKE HARDCODING :D
+
+	return a;
 }
 
 int
@@ -378,6 +440,12 @@ pe_render(struct pe_context *c)
 {
 	int i, j;
 	struct mat4 res, prj, vp;
+
+	double *zbuf = zbuf_init(c);
+
+	if (!zbuf)
+		return 1;
+		//TODO: ERRMSG
 
 	mat4transpose(&prj, &c->perspmat);
 	mat4transpose(&res, &c->worldmat);
@@ -402,13 +470,15 @@ pe_render(struct pe_context *c)
 			pa->y /= pa->w;
 			pa->z /= pa->w;
 			pa->w = 1;
-			
+
 			memcpy(tex + j, dbuf_get(c->texcoord, pidx[j].t),
 				sizeof(struct vec3));
 		}
 
-		draw_triangle(c, triangle, tex);
+		draw_triangle(c, triangle, tex, zbuf);
 	}
+
+	free(zbuf);
 
 	return 0;
 }
