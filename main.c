@@ -225,7 +225,8 @@ main(int argc, char **argv)
 	pe_settarget(&(rd.context), &(rd.sur));
 
 	pe_setperspmatrix(&(rd.context),
-		mat4persp(&perspmat, 1, 100, -1, 1, -1, 1));
+		mat4persp(&perspmat, 1, 100,
+		-1.0, 1.0, -1.0, 1.0));
 
 //	rd.context.conf.wired = 1;
 

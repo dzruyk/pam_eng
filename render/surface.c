@@ -310,19 +310,27 @@ int
 pe_getpoint(const struct pe_surface *sur, double fx, double fy,
 	struct pe_color *col)
 {
-	int x, y;
-
-	if (fx < 0.0 || fy < 0.0 || fx > 1.0 || fy > 1.0) {
-		col->r = 0;
-		col->g = 0;
-		col->b = 0;
-		col->a = 255;
-
-		return 0;
-	}
+	double x, y;
 
 	x = (double) (sur->w - 1) * fx;
 	y = (double) (sur->h - 1) * fy;
+
+
+	if (fx < 0.0 || fx > 1.0 || fy < 0.0 || fy > 1.0) {
+		if (fx < 0.0)
+			x = 0;
+		if (fx > 1.0)
+			x = sur->w - 1;
+		if (fy < 0.0)
+			y = 0;
+		if (fy > 1.0)
+			y = sur->h - 1;
+	
+		col->b = nd_linearinterp(sur, x, y, 2) / 255.0;
+		col->g = nd_linearinterp(sur, x, y, 1) / 255.0;
+		col->r = nd_linearinterp(sur, x, y, 0) / 255.0;
+		col->a = 1.0;
+	}
 	
 	col->b = nd_linearinterp(sur, x, y, 2) / 255.0;
 	col->g = nd_linearinterp(sur, x, y, 1) / 255.0;
