@@ -362,7 +362,7 @@ mat4transpose(struct mat4 *res, const struct mat4 *src)
 
 	return res;
 }
-
+/*
 struct mat4 *
 mat4persp(struct mat4 *res, double near, double far,
 	double left, double right, double bot, double top)
@@ -384,4 +384,20 @@ mat4persp(struct mat4 *res, double near, double far,
 
 	return res;
 }
+*/
 
+struct mat4 *
+mat4persp(struct mat4 *res, double asp, double fovy, double near, double far)
+{
+	double a, f;
+
+	a = 1.0 / tan(fovy / 2.0);
+	f = far / (far - near);
+
+	res->_11 = a / asp; res->_12 = 0.0; res->_13 = 0.0; res->_14 = 0.0;
+	res->_21 = 0; res->_22 = a; res->_23 = 0; res->_24 = 0;
+	res->_31 = 0; res->_32 = 0; res->_33 = f; res->_34 = 1.0;
+	res->_41 = 0; res->_42 = 0; res->_43 = -near * f; res->_44 = 0;
+
+	return res;
+}

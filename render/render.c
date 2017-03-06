@@ -46,7 +46,6 @@ pe_initcontext(struct pe_context *c)
 int
 pe_settarget(struct pe_context *c, struct pe_surface *sur)
 {
-	double s;
 	struct mat4 tmpm;
 
 	if (c == NULL || sur == NULL)
@@ -54,12 +53,11 @@ pe_settarget(struct pe_context *c, struct pe_surface *sur)
 
 	c->target = sur;
 
-	s = MIN(c->target->w, c->target->h) * 0.5;
-	mat4scale(&tmpm, s, s, 1.0);
+	mat4scale(&tmpm, c->target->w * 0.5, c->target->h * 0.5, 1.0);
 	mat4move(&(c->viewportmat), 1.0, 1.0, 0.0);
 	mat4mult(&(c->viewportmat), &tmpm, &(c->viewportmat));
 
-	if (c->zbuffer)
+	if (c->zbuffer == NULL)
 		free(c->zbuffer);
 
 	c->zbuffer = malloc(c->target->w * c->target->h * sizeof(double));
@@ -214,13 +212,20 @@ fill_triangle(const struct pe_context *ctx,
 	double v1, v2, v3;
 	double b1, b2, b3;
 	int x, y;
-
+/*
 	x1 = round(tr[0].x);	y1 = round(tr[0].y);
 		z1 = (tr[0].z + 1.0) * 0.5;	u1 = tex[0].x;	v1 = tex[0].y;
 	x2 = round(tr[1].x);	y2 = round(tr[1].y);
 		z2 = (tr[1].z + 1.0) * 0.5;	u2 = tex[1].x;	v2 = tex[1].y;
 	x3 = round(tr[2].x);	y3 = round(tr[2].y);
 		z3 = (tr[2].z + 1.0) * 0.5;	u3 = tex[2].x;	v3 = tex[2].y;
+*/
+	x1 = round(tr[0].x);	y1 = round(tr[0].y);
+		z1 = tr[0].z;	u1 = tex[0].x;	v1 = tex[0].y;
+	x2 = round(tr[1].x);	y2 = round(tr[1].y);
+		z2 = tr[1].z;	u2 = tex[1].x;	v2 = tex[1].y;
+	x3 = round(tr[2].x);	y3 = round(tr[2].y);
+		z3 = tr[2].z;	u3 = tex[2].x;	v3 = tex[2].y;
 
 	if (y1 > y2) {
 		swap(x1, x2);
@@ -269,7 +274,6 @@ fill_triangle(const struct pe_context *ctx,
 			us1 = zs1 * interpattr(u1, z1, u3, z3, t);
 			vs1 = zs1 * interpattr(v1, z1, v3, z3, t);
 
-
 			t = pointdist(x1, y1, minx, y)
 				/ pointdist(x1, y1, x2, y2);
 	
@@ -314,8 +318,8 @@ fill_triangle(const struct pe_context *ctx,
 			u = z * interpattr(us0, zs0, us1, zs1, t);
 			v = z * interpattr(vs0, zs0, vs1, zs1, t);
 
-			if (y < 0 && x < 0 && y >= ctx->target->h
-				&& x >= ctx->target->w)
+			if (y < 0 || x < 0 || y >= ctx->target->h
+				|| x >= ctx->target->w)
 				continue;
 
 			if (z > 0.0
@@ -409,14 +413,10 @@ int
 pe_render(struct pe_context *c)
 {
 	int i, j;
-	struct mat4 res, prj, vp;
-
-	mat4transpose(&prj, &c->perspmat);
-	mat4transpose(&res, &c->worldmat);
-	mat4transpose(&vp, &c->viewportmat);
-	mat4mult(&res, &res, &prj);
-	mat4mult(&res, &res, &vp);
-	mat4transpose(&res, &res);
+	struct mat4 res;
+	
+	mat4mult(&res, &(c->perspmat), &(c->worldmat));
+	mat4mult(&res, &(c->viewportmat), &res);
 
 	for (i = 0; i < c->target->w * c->target->h; ++i)
 		c->zbuffer[i] = 1.0;
@@ -429,21 +429,22 @@ pe_render(struct pe_context *c)
 		pidx = dbuf_get(c->index, i);
 		for (j = 0; j < 3; j++) {
 			pa = dbuf_get(c->vertex, pidx[j].v);
-			pa->w = 1;
+			pa->w = 1.0;
 
 			pa = mat4vec(triangle + j, &res, pa);
 	
 			pa->x /= pa->w;
 			pa->y /= pa->w;
-			pa->z /= pa->w;
+			///!!!!!!!!!!!!!!!!!!!!!!!!
+			pa->z /= -pa->w;
 			pa->w /= pa->w;
-			
+
 			memcpy(tex + j, dbuf_get(c->texcoord, pidx[j].t),
 				sizeof(struct vec3));
 		}
 		
 		draw_triangle(c, triangle, tex);
 	}
-
+	
 	return 0;
 }

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <math.h>
 
 #include <libgen.h>
 
@@ -211,7 +212,7 @@ main(int argc, char **argv)
 
 	pe_objload(&(rd.m), argv[1]);
 
-	//pe_meshnormalize(&(rd.m));
+//	pe_meshnormalize(&(rd.m));
 
 	if (pe_createsur(&(rd.sur), SURWIDTH, SURHEIGHT, SF_RGB24) < 0)
 		return 1;
@@ -224,13 +225,19 @@ main(int argc, char **argv)
 	pe_initcontext(&(rd.context));
 	pe_settarget(&(rd.context), &(rd.sur));
 
+/*
 	pe_setperspmatrix(&(rd.context),
 		mat4persp(&perspmat, 1, 100,
 		-1.0, 1.0, -1.0, 1.0));
+*/
+	pe_setperspmatrix(&(rd.context),
+		mat4persp(&perspmat,
+		SURWIDTH / (double) SURHEIGHT, 0.25 * M_PI, 1.0, 1000.0));
+
 
 //	rd.context.conf.wired = 1;
 
-	pe_cammove(&rd.context.worldmat, 0, 0, -2.);
+	pe_cammove(&rd.context.worldmat, 0, 0, -2.0);
 
 	guidata.defaultcallback = render;
 	guidata.drawcallback = draw;
