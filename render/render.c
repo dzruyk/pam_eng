@@ -57,7 +57,7 @@ pe_settarget(struct pe_context *c, struct pe_surface *sur)
 	mat4move(&(c->viewportmat), 1.0, 1.0, 0.0);
 	mat4mult(&(c->viewportmat), &tmpm, &(c->viewportmat));
 
-	if (c->zbuffer == NULL)
+	if (c->zbuffer != NULL)
 		free(c->zbuffer);
 
 	c->zbuffer = malloc(c->target->w * c->target->h * sizeof(double));
@@ -201,54 +201,47 @@ static double interpattr(double a1, double z1, double a2, double z2, double t)
 	return ((1.0 - t) * a1 / z1 + t * a2 / z2);
 }
 
+#define set_vpoint(vp, idx) 	do {		\
+	vp.x = (int)round(tr[idx].x);		\
+	vp.y = (int)round(tr[idx].y);		\
+	vp.z = tr[idx].z;			\
+	vp.u = tex[idx].x;			\
+	vp.v = tex[idx].y;			\
+} while (0)
+
 void
 fill_triangle(const struct pe_context *ctx,
 	const struct vec4 tr[3], const struct vec3 tex[3])
 {
-	int x1, x2, x3;
-	int y1, y2, y3;
-	double z1, z2, z3;
-	double u1, u2, u3;
-	double v1, v2, v3;
-	double b1, b2, b3;
 	int x, y;
+	double b1, b2, b3;
 
-	x1 = round(tr[0].x);	y1 = round(tr[0].y);
-		z1 = tr[0].z;	u1 = tex[0].x;	v1 = tex[0].y;
-	x2 = round(tr[1].x);	y2 = round(tr[1].y);
-		z2 = tr[1].z;	u2 = tex[1].x;	v2 = tex[1].y;
-	x3 = round(tr[2].x);	y3 = round(tr[2].y);
-		z3 = tr[2].z;	u3 = tex[2].x;	v3 = tex[2].y;
+	struct vpoint {
+		int x, y;
+		double z;
+		double u, v;
+	} p1, p2, p3;
 
-	if (y1 > y2) {
-		swap(x1, x2);
-		swap(y1, y2);
-		swap(z1, z2);
-		swap(u1, u2);
-		swap(v1, v2);
-	}
+	set_vpoint(p1, 0);
+	set_vpoint(p2, 1);
+	set_vpoint(p3, 2);
 
-	if (y2 > y3) {
-		swap(x2, x3);
-		swap(y2, y3);
-		swap(z2, z3);
-		swap(u2, u3);
-		swap(v2, v3);
-	}
+	if (p1.y > p2.y)
+		swap(p1, p2);
 
-	if (y1 > y2) {
-		swap(x1, x2);
-		swap(y1, y2);
-		swap(z1, z2);
-		swap(u1, u2);
-		swap(v1, v2);
-	}
+	if (p2.y > p3.y)
+		swap(p2, p3);
 
-	b1 = (y2 - y1) ? ((double) (x2 - x1) / (y2 - y1)) : 0.0;
-	b2 = (y3 - y1) ? ((double) (x3 - x1) / (y3 - y1)) : 0.0;
-	b3 = (y3 - y2) ? ((double) (x3 - x2) / (y3 - y2)) : 0.0;
+	if (p1.y > p2.y)
+		swap(p1, p2);
 
-	for (y = y1; y < y3; ++y) {
+	b1 = (p2.y - p1.y) ? ((double) (p2.x - p1.x) / (p2.y - p1.y)) : 0.0;
+	b2 = (p3.y - p1.y) ? ((double) (p3.x - p1.x) / (p3.y - p1.y)) : 0.0;
+	b3 = (p3.y - p2.y) ? ((double) (p3.x - p2.x) / (p3.y - p2.y)) : 0.0;
+
+	for (y = p1.y; y < p3.y; ++y) {
+		struct vpoint *pp1, *pp2, *pp3;
+		double bx = b1;
 		int minx, maxx;
 
 		double us0, vs0, zs0;
@@ -256,43 +249,32 @@ fill_triangle(const struct pe_context *ctx,
 		double u, v, z;
 		double t;
 
-		if (y < y2) {
-			minx = (y - y1) * b1 + x1;
-			maxx = (y - y1) * b2 + x1;
+		pp1 = &p1;
+		pp2 = &p2;
+		pp3 = &p3;
 
-			t = pointdist(x1, y1, maxx, y)
-				/ pointdist(x1, y1, x3, y3);
-
-			zs1 = interpz(z1, z3, t);
-			us1 = zs1 * interpattr(u1, z1, u3, z3, t);
-			vs1 = zs1 * interpattr(v1, z1, v3, z3, t);
-
-			t = pointdist(x1, y1, minx, y)
-				/ pointdist(x1, y1, x2, y2);
-
-			zs0 = interpz(z1, z2, t);
-			us0 = zs0 * interpattr(u1, z1, u2, z2, t);
-			vs0 = zs0 * interpattr(v1, z1, v2, z2, t);
-
+		if (y > p2.y || p1.y == p2.y) {
+			swap(pp1, pp3);
+			bx = b3;
 		}
-		else {
-			minx = (y - y2) * b3 + x2;
-			maxx = (y - y1) * b2 + x1;
 
-			t = pointdist(x1, y1, maxx, y)
-				/ pointdist(x1, y1, x3, y3);
+		minx = (y - pp1->y) * bx + pp1->x;
+		maxx = (y - pp1->y) * b2 + pp1->x;
 
-			zs1 = interpz(z1, z3, t);
-			us1 = zs1 * interpattr(u1, z1, u3, z3, t);
-			vs1 = zs1 * interpattr(v1, z1, v3, z3, t);
+		t = pointdist(pp1->x, pp1->y, maxx, y)
+			/ pointdist(pp1->x, pp1->y, pp3->x, pp3->y);
 
-			t = pointdist(x2, y2, minx, y)
-				/ pointdist(x2, y2, x3, y3);
+		zs1 = interpz(pp1->z, pp3->z, t);
+		us1 = zs1 * interpattr(pp1->u, pp1->z, pp3->u, pp3->z, t);
+		vs1 = zs1 * interpattr(pp1->v, pp1->z, pp3->v, pp3->z, t);
 
-			zs0 = interpz(z2, z3, t);
-			us0 = zs0 * interpattr(u2, z2, u3, z3, t);
-			vs0 = zs0 * interpattr(v2, z2, v3, z3, t);
-		}
+
+		t = pointdist(pp1->x, pp1->y, minx, y)
+			/ pointdist(pp1->x, pp1->y, pp2->x, pp2->y);
+
+		zs0 = interpz(pp1->z, pp2->z, t);
+		us0 = zs0 * interpattr(pp1->u, pp1->z, pp2->u, pp2->z, t);
+		vs0 = zs0 * interpattr(pp1->v, pp1->z, pp2->v, pp2->z, t);
 
 		if (minx > maxx) {
 			swap(minx, maxx);
@@ -326,7 +308,7 @@ fill_triangle(const struct pe_context *ctx,
 		}
 	}
 }
-
+#undef set_vpoint
 /*
 // Slower, but more stable algorithm for triangle filling
 //
@@ -391,8 +373,6 @@ static inline void
 draw_triangle(const struct pe_context *c,
 	const struct vec4 t[3], const struct vec3 tex[3])
 {
-	int i;
-
 	if (isbackface(t))
 		return;
 
