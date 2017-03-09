@@ -27,7 +27,7 @@ pe_initcontext(struct pe_context *c)
 	pe_surfromfile("african_head_diffuse.png", &sur);
 //	pe_surfromfile("rooster_color.png", &sur);
 //	pe_surfromfile("chesstex.png", &sur);
-	
+
 	mat4identity(&c->worldmat);
 	mat4identity(&c->perspmat);
 	mat4identity(&c->viewportmat);
@@ -212,14 +212,7 @@ fill_triangle(const struct pe_context *ctx,
 	double v1, v2, v3;
 	double b1, b2, b3;
 	int x, y;
-/*
-	x1 = round(tr[0].x);	y1 = round(tr[0].y);
-		z1 = (tr[0].z + 1.0) * 0.5;	u1 = tex[0].x;	v1 = tex[0].y;
-	x2 = round(tr[1].x);	y2 = round(tr[1].y);
-		z2 = (tr[1].z + 1.0) * 0.5;	u2 = tex[1].x;	v2 = tex[1].y;
-	x3 = round(tr[2].x);	y3 = round(tr[2].y);
-		z3 = (tr[2].z + 1.0) * 0.5;	u3 = tex[2].x;	v3 = tex[2].y;
-*/
+
 	x1 = round(tr[0].x);	y1 = round(tr[0].y);
 		z1 = tr[0].z;	u1 = tex[0].x;	v1 = tex[0].y;
 	x2 = round(tr[1].x);	y2 = round(tr[1].y);
@@ -269,14 +262,14 @@ fill_triangle(const struct pe_context *ctx,
 
 			t = pointdist(x1, y1, maxx, y)
 				/ pointdist(x1, y1, x3, y3);
-		
+
 			zs1 = interpz(z1, z3, t);
 			us1 = zs1 * interpattr(u1, z1, u3, z3, t);
 			vs1 = zs1 * interpattr(v1, z1, v3, z3, t);
 
 			t = pointdist(x1, y1, minx, y)
 				/ pointdist(x1, y1, x2, y2);
-	
+
 			zs0 = interpz(z1, z2, t);
 			us0 = zs0 * interpattr(u1, z1, u2, z2, t);
 			vs0 = zs0 * interpattr(v1, z1, v2, z2, t);
@@ -288,14 +281,14 @@ fill_triangle(const struct pe_context *ctx,
 
 			t = pointdist(x1, y1, maxx, y)
 				/ pointdist(x1, y1, x3, y3);
-	
+
 			zs1 = interpz(z1, z3, t);
 			us1 = zs1 * interpattr(u1, z1, u3, z3, t);
 			vs1 = zs1 * interpattr(v1, z1, v3, z3, t);
 
 			t = pointdist(x2, y2, minx, y)
 				/ pointdist(x2, y2, x3, y3);
-	
+
 			zs0 = interpz(z2, z3, t);
 			us0 = zs0 * interpattr(u2, z2, u3, z3, t);
 			vs0 = zs0 * interpattr(v2, z2, v3, z3, t);
@@ -324,7 +317,7 @@ fill_triangle(const struct pe_context *ctx,
 
 			if (z > 0.0
 				&& z < ctx->zbuffer[y * ctx->target->w + x]) {
-				
+
 				pe_getpoint(&sur, u, 1.0 - v, &col);
 				pe_setpoint(ctx->target, x, y, &col);
 
@@ -414,7 +407,7 @@ pe_render(struct pe_context *c)
 {
 	int i, j;
 	struct mat4 res;
-	
+
 	mat4mult(&res, &(c->perspmat), &(c->worldmat));
 	mat4mult(&res, &(c->viewportmat), &res);
 
@@ -432,19 +425,18 @@ pe_render(struct pe_context *c)
 			pa->w = 1.0;
 
 			pa = mat4vec(triangle + j, &res, pa);
-	
+
 			pa->x /= pa->w;
 			pa->y /= pa->w;
-			///!!!!!!!!!!!!!!!!!!!!!!!!
-			pa->z /= -pa->w;
-			pa->w /= pa->w;
+			pa->z /= pa->w;
+			pa->w = 1;
 
 			memcpy(tex + j, dbuf_get(c->texcoord, pidx[j].t),
 				sizeof(struct vec3));
 		}
-		
+
 		draw_triangle(c, triangle, tex);
 	}
-	
+
 	return 0;
 }
